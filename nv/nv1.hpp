@@ -108,6 +108,8 @@ public:
         state.video_ram32 = (uint32_t*)calloc(1, settings.vram_amount);
         state.video_ram16 = (uint16_t*)state.video_ram32;
         state.video_ram8 = (uint8_t*)state.video_ram32;
+        
+        state.running = false;
     };
 
     PMC pmc;
