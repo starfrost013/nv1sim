@@ -37,7 +37,11 @@ private:
     // The state of the NV1
     struct GPUState
     {
-
+        bool running;                   // Is our GPU running?
+        bool in_reset;                  // in reset
+        uint32_t* video_ram32;          // Video RAM (32-bit addressing)
+        uint16_t* video_ram16;          // Video RAM (16-bit addressing)
+        uint8_t* video_ram8;            // Video RAM (8-bit addressing)
     };
 
     // Master Control 
@@ -60,8 +64,26 @@ private:
 
     }; 
 
+    // Framebuffer interface & control
+    struct PFB
+    {
+
+    };
+
+    // Bus Interface
+    struct PBUS
+    {
+
+    }; 
+
     // 2D & 3D Rendering Engine 
     struct PGRAPH
+    {
+
+    };
+
+    // Audio engine
+    struct PAUDIO
     {
 
     };
@@ -73,10 +95,27 @@ private:
     };
 
     GPUSettings settings;
+    GPUState state;
+
 
 public: 
     // NV1 Constructor
-    NV1(GPUSettings new_settings) { settings = new_settings; };
+    NV1(GPUSettings new_settings) 
+    { 
+        settings = new_settings; 
 
+        //temp - tracked alloc?
+        state.video_ram32 = (uint32_t*)calloc(1, settings.vram_amount);
+        state.video_ram16 = (uint16_t*)state.video_ram32;
+        state.video_ram8 = (uint8_t*)state.video_ram32;
+    };
 
+    PMC pmc;
+    PRMC prmc; 
+    PFIFO pfifo;
+    PFB pfb;
+    PBUS pbus;
+    PGRAPH pgraph;
+    PAUDIO paudio;
+    PAUTH pauth;
 }; 
