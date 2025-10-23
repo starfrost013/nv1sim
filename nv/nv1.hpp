@@ -16,108 +16,123 @@
 #include <nv1sim.hpp>
 #include "nv1_regs.hpp"
 
-#define VRAM_AMOUNT_1MB         1048576
-#define VRAM_AMOUNT_2MB         2097152
-#define VRAM_AMOUNT_4MB         4194304
-
-// The main class, where everything cool happens.
-class NV1
+namespace NV1Sim
 {
 
-private: 
+    #define VRAM_AMOUNT_1MB         1048576
+    #define VRAM_AMOUNT_2MB         2097152
+    #define VRAM_AMOUNT_4MB         4194304
 
-
-    // The settings of the GPU
-    struct GPUSettings
+    // The main class, where everything cool happens.
+    class NV1
     {
-        uint32_t vram_amount; 
-        uint32_t straps;
+
+    private: 
+        // The settings of the GPU
+        struct GPUSettings
+        {
+            uint32_t vram_amount; 
+            uint32_t straps;
+        }; 
+
+        // The state of the NV1
+        struct GPUState
+        {
+            bool running;                   // Is our GPU running?
+            bool in_reset;                  // in reset
+            uint32_t* video_ram32;          // Video RAM (32-bit addressing)
+            uint16_t* video_ram16;          // Video RAM (16-bit addressing)
+            uint8_t* video_ram8;            // Video RAM (8-bit addressing)
+        };
+
+        // Master Control 
+        struct PMC
+        {
+            uint32_t enable;                // Master GPU Control
+            uint32_t intr;                  // Interrupt status
+            uint32_t intr_en;               // Master Interrupt Enable
+        };
+
+        // Real-Mode Communication
+        struct PRMC
+        {
+
+        };
+
+        // I/O Architecture & Submission 
+        struct PFIFO
+        {
+
+        }; 
+
+        // Framebuffer interface & control
+        struct PFB
+        {
+
+        };
+
+        // Bus Interface
+        struct PBUS
+        {
+
+        }; 
+
+        // 2D & 3D Rendering Engine 
+        struct PGRAPH
+        {
+
+        };
+
+        // Audio engine
+        struct PAUDIO
+        {
+
+        };
+
+        // DRM & Authentication Engine
+        struct PAUTH
+        {
+
+        };
+
+        GPUSettings settings;
+        GPUState state;
+
+
+    public: 
+        // NV1 Constructor
+        NV1(GPUSettings new_settings) 
+        { 
+            settings = new_settings; 
+
+            //temp - tracked alloc?
+            state.video_ram32 = (uint32_t*)calloc(1, settings.vram_amount); // POD so its ok
+            state.video_ram16 = (uint16_t*)state.video_ram32;
+            state.video_ram8 = (uint8_t*)state.video_ram32;
+            
+            state.running = false;
+        };
+
+        PMC pmc;
+        PRMC prmc; 
+        PFIFO pfifo;
+        PFB pfb;
+        PBUS pbus;
+        PGRAPH pgraph;
+        PAUDIO paudio;
+        PAUTH pauth;
+    
+        template <typename T>
+        struct NV1Mapping
+        {
+            T* addr; 
+        };
+
+        std::unordered_map<uint32_t, NV1Mapping<uint32_t>> nv1_mappings =
+        {
+            { 0x0, { &this->pmc.enable } }, 
+        }; 
     }; 
 
-    // The state of the NV1
-    struct GPUState
-    {
-        bool running;                   // Is our GPU running?
-        bool in_reset;                  // in reset
-        uint32_t* video_ram32;          // Video RAM (32-bit addressing)
-        uint16_t* video_ram16;          // Video RAM (16-bit addressing)
-        uint8_t* video_ram8;            // Video RAM (8-bit addressing)
-    };
 
-    // Master Control 
-    struct PMC
-    {
-        uint32_t enable;                // Master GPU Control
-        uint32_t intr;                  // Interrupt status
-        uint32_t intr_en;               // Master Interrupt Enable
-    };
-
-    // Real-Mode Communication
-    struct PRMC
-    {
-
-    };
-
-    // I/O Architecture & Submission 
-    struct PFIFO
-    {
-
-    }; 
-
-    // Framebuffer interface & control
-    struct PFB
-    {
-
-    };
-
-    // Bus Interface
-    struct PBUS
-    {
-
-    }; 
-
-    // 2D & 3D Rendering Engine 
-    struct PGRAPH
-    {
-
-    };
-
-    // Audio engine
-    struct PAUDIO
-    {
-
-    };
-
-    // DRM & Authentication Engine
-    struct PAUTH
-    {
-
-    };
-
-    GPUSettings settings;
-    GPUState state;
-
-
-public: 
-    // NV1 Constructor
-    NV1(GPUSettings new_settings) 
-    { 
-        settings = new_settings; 
-
-        //temp - tracked alloc?
-        state.video_ram32 = (uint32_t*)calloc(1, settings.vram_amount);
-        state.video_ram16 = (uint16_t*)state.video_ram32;
-        state.video_ram8 = (uint8_t*)state.video_ram32;
-        
-        state.running = false;
-    };
-
-    PMC pmc;
-    PRMC prmc; 
-    PFIFO pfifo;
-    PFB pfb;
-    PBUS pbus;
-    PGRAPH pgraph;
-    PAUDIO paudio;
-    PAUTH pauth;
-}; 
+}

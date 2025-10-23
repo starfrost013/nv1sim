@@ -1,6 +1,11 @@
 #pragma once 
 #include <SDL3/SDL.h>
 
+// Core STL
+#include <cstdint>
+#include <cstdlib>
+#include <unordered_map>
+
 #define APP_NAME "Nvidia NV1 Multimedia Accelerator Simulator"
 #define APP_VERSION "Pre-Alpha 0.1"
 #define APP_BUILD_DATE __DATE__ " " __TIME__ 

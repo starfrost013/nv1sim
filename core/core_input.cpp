@@ -8,9 +8,12 @@
 
 /* A pretty basic input system */
 
-bool key_state[SDL_SCANCODE_COUNT];
-
-bool Input_KeyIsDown(uint32_t scancode)
+namespace NV1Sim
 {
-    return key_state[scancode];
+    bool key_state[SDL_SCANCODE_COUNT];
+
+    bool Input_KeyIsDown(uint32_t scancode)
+    {
+        return key_state[scancode];
+    }
 }

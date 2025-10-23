@@ -7,6 +7,9 @@
 #include "SDL3/SDL_render.h"
 #include "SDL3/SDL_video.h"
 
+namespace NV1Sim
+{
+
 Game game = {0};               
 
 bool Game_Init()
@@ -76,4 +79,5 @@ bool Game_Shutdown()
     exit(0);
 
     return true;
+}
 }

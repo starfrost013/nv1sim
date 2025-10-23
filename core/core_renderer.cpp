@@ -5,9 +5,12 @@
 
 #include <core/core.hpp>
 
-// Implements the Digital Differential Analyzer (DDA) algorithm, for the purposes of rendering a level.
-void Game_RenderLevel()
-{  
+namespace NV1Sim
+{
+    // Implements the Digital Differential Analyzer (DDA) algorithm, for the purposes of rendering a level.
+    void Game_RenderLevel()
+    {  
 
-   
+    
+    }
 }
