@@ -48,9 +48,12 @@ namespace NV1Sim
         // Master Control 
         struct PMC
         {
-            uint32_t enable;                // Master GPU Control
+            uint32_t boot;                  // Boot configuration register
             uint32_t intr;                  // Interrupt status
             uint32_t intr_en;               // Master Interrupt Enable
+            uint32_t intr_read;             // Interrupt Read
+            uint32_t enable;                // Master GPU Control
+
         };
 
         // Real-Mode Communication
@@ -68,7 +71,7 @@ namespace NV1Sim
         // Framebuffer interface & control
         struct PFB
         {
-
+            uint32_t config; 
         };
 
         // Bus Interface
@@ -98,6 +101,24 @@ namespace NV1Sim
         GPUSettings settings;
         GPUState state;
 
+        // Move to private cpp file?
+        inline __attribute__((always_inline)) uint32_t GetRAMINAddress(uint32_t addr)
+        {
+            addr ^= 4; 
+
+            // This one is straight from envytools: https://envytools.readthedocs.io/en/latest/hw/memory/nv1-vram.html?highlight=ramin
+            // Note: NV3 has 4 buffers, NV4 has 6!
+            if ((pfb.config >> NV_PFB_CONFIG_0_SECOND_BUFFER))
+            {
+                addr = (addr & 0xFF) | ((addr >> 1) & ~0xFF);
+                addr %= (settings.vram_amount >> 1);
+                addr += (settings.vram_amount >> 1) * (addr >> 8) & 1;
+            }
+            else
+                addr %= settings.vram_amount;
+
+            return addr; 
+        }
 
     public: 
         // NV1 Constructor
@@ -122,17 +143,49 @@ namespace NV1Sim
         PAUDIO paudio;
         PAUTH pauth;
     
-        template <typename T>
         struct NV1Mapping
         {
-            T* addr; 
+            uint32_t* reg;
+
+            void (NV1::*read_func)();
+            void (NV1::*write_func)();
         };
 
-        std::unordered_map<uint32_t, NV1Mapping<uint32_t>> nv1_mappings =
+        // nearly every register is 32bit so we can get away with this 
+        // we don't bother emulating the DAC, because the "DAC" is basically SDL
+        std::unordered_map<uint32_t, NV1Mapping> mappings32 =
         {
-            { 0x0, { &this->pmc.enable } }, 
+            // PMC
+            { NV_PMC_BOOT_0, { &this->pmc.boot, nullptr, nullptr } }, 
+            { NV_PMC_INTR_0, { &this->pmc.intr, nullptr, nullptr } },
+            { NV_PMC_INTR_EN_0, { &this->pmc.intr_en, nullptr, nullptr } }, 
+            { NV_PMC_INTR_READ_0, { &this->pmc.intr_read, nullptr, nullptr } },
+            { NV_PMC_ENABLE, { &this->pmc.enable, nullptr, nullptr } },
+
+            // PFB
+            { NV_PFB_CONFIG_0, { &this->pfb.config, nullptr, nullptr } }, 
         }; 
+
+        uint32_t ReadRegister32(uint32_t addr) 
+        { 
+            return *mappings32[addr].reg; 
+        };
+
+        void WriteRegister32(uint32_t addr, uint32_t value)
+        { 
+            *mappings32[addr].reg = value; 
+        };
+
+        uint8_t ReadVRAM8(uint32_t addr) { return state.video_ram8[addr]; }; 
+        uint16_t ReadVRAM16(uint32_t addr) { return state.video_ram16[addr >> 1]; }; 
+        uint32_t ReadVRAM32(uint32_t addr) { return state.video_ram32[addr >> 2]; }; 
+        void WriteVRAM8(uint32_t addr, uint32_t value) { state.video_ram8[addr] = value; }; 
+        void WriteVRAM16(uint32_t addr, uint32_t value) { state.video_ram16[addr >> 1] = value; }; 
+        void WriteVRAM32(uint32_t addr, uint32_t value) { state.video_ram32[addr >> 2] = value; }; 
+        
+        // RAMIN
+        uint32_t ReadRAMIN32(uint32_t addr) { return state.video_ram32[GetRAMINAddress(addr) >> 2]; };
+        void WriteRAMIN32(uint32_t addr, uint32_t value) { state.video_ram32[GetRAMINAddress(addr) >> 2] = value; };
+    
     }; 
-
-
 }

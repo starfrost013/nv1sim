@@ -2976,7 +2976,7 @@
 #define NV_PFB_CONFIG_0_PIXEL_DEPTH_8_BITS               0x00000001 /* RW--V */
 #define NV_PFB_CONFIG_0_PIXEL_DEPTH_16_BITS              0x00000002 /* RW--V */
 #define NV_PFB_CONFIG_0_PIXEL_DEPTH_32_BITS              0x00000003 /* RW--V */
-#define NV_PFB_CONFIG_0_SECOND_BUFFER                         12:12 /* RWIVF */
+#define NV_PFB_CONFIG_0_SECOND_BUFFER                            12 /* RWIVF */
 #define NV_PFB_CONFIG_0_SECOND_BUFFER_DISABLED           0x00000000 /* RWI-V */
 #define NV_PFB_CONFIG_0_SECOND_BUFFER_ENABLED            0x00000001 /* RW--V */
 #define NV_PFB_CONFIG_0_PAGE_HEIGHT                           18:16 /* RWIVF */
