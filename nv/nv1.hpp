@@ -147,8 +147,8 @@ namespace NV1Sim
         {
             uint32_t* reg;
 
-            void (NV1::*read_func)();
-            void (NV1::*write_func)();
+            uint32_t (NV1::*read_func)(uint32_t addr);
+            void (NV1::*write_func)(uint32_t addr, uint32_t value);
         };
 
         // nearly every register is 32bit so we can get away with this 
@@ -168,12 +168,18 @@ namespace NV1Sim
 
         uint32_t ReadRegister32(uint32_t addr) 
         { 
-            return *mappings32[addr].reg; 
+            if (mappings32[addr].read_func)
+                return (this->*this->mappings32[addr].read_func)(addr);
+            else
+                return *mappings32[addr].reg; 
         };
 
         void WriteRegister32(uint32_t addr, uint32_t value)
         { 
-            *mappings32[addr].reg = value; 
+            if (mappings32[addr].write_func)
+                (this->*this->mappings32[addr].write_func)(addr, value);
+            else 
+                *mappings32[addr].reg = value; 
         };
 
         uint8_t ReadVRAM8(uint32_t addr) { return state.video_ram8[addr]; }; 
