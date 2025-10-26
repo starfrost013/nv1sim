@@ -6,8 +6,6 @@
 //
 
 #include "logging.hpp"
-#include <chrono>
-#include <util/util.hpp>
 
 namespace NV1Sim
 {
@@ -22,6 +20,51 @@ namespace NV1Sim
 	// Prototypes for "internal" functions only used in this source file
 	void Logging_Log(const char* text, LogChannel channel, va_list args);
 
+	// various buffer size demands
+	#define CONSOLE_ESC_CHAR				"\x1B"	//Some commands don't use it
+	#define CONSOLE_TERMINAL_COMMAND_PREFIX "\x1B["
+	#define CONSOLE_COLOR_BUFFER_SIZE		24		// maded a bit bigger for safety
+
+	void Util_ConsoleSetForegroundColor(ConsoleColor color)
+	{
+		int32_t color_final = 30 + color;
+
+		if (color >= ConsoleColor::FIRST_BRIGHT) 
+			color_final = 90 + (color & ConsoleColor::FIRST_BRIGHT - 1);
+
+		// 10 (max) + 1 + 4 + 1 for safety
+		char final_string[CONSOLE_COLOR_BUFFER_SIZE] = { 0 };
+
+		snprintf(final_string, CONSOLE_COLOR_BUFFER_SIZE, "%s%dm", color_final);
+
+		printf("%s", final_string);
+	}
+
+	void Util_ConsoleSetBackgroundColor(ConsoleColor color)
+	{
+		int32_t color_final = 40 + color;
+
+		if (color >= ConsoleColor::FIRST_BRIGHT) 
+			color_final = 100 + (color & ConsoleColor::FIRST_BRIGHT - 1);
+
+		// 10 (max) + 1 + 4 + 1 for safety
+		char final_string[CONSOLE_COLOR_BUFFER_SIZE] = { 0 };
+
+		snprintf(final_string, CONSOLE_COLOR_BUFFER_SIZE, "%s%dm", color_final);
+		
+		printf("%s", final_string);
+	}
+
+	void Util_ConsoleResetForegroundColor()
+	{
+		printf(CONSOLE_TERMINAL_COMMAND_PREFIX "39m");
+	}
+
+	void Util_ConsoleResetBackgroundColor()
+	{
+		printf(CONSOLE_TERMINAL_COMMAND_PREFIX "49m");
+	}
+
 	// not threadsafe :O
 	Logger logger = { 0 };
 
@@ -29,13 +72,16 @@ namespace NV1Sim
 	bool Logging_Init()
 	{
 		//todo: allow this to be configured in settings
+		if (!logger.settings.changed)
+		{
+			logger.settings.channels = (LogChannel)(LogChannel::Debug | LogChannel::Message | LogChannel::Warning | LogChannel::Error | LogChannel::Fatal | LogChannel::SuperFatal);
+			logger.settings.source = (LogDestination)(LogDestination::Printf | LogDestination::File);
+			logger.settings.keep_old_logs = false; 
+		}
 
 		if (!logger.settings.file_name) 
 			logger.settings.file_name = "latest.log";
 			
-		logger.settings.channels = (LogChannel)(LogChannel::Debug | LogChannel::Message | LogChannel::Warning | LogChannel::Error | LogChannel::Fatal | LogChannel::SuperFatal);
-		logger.settings.source = (LogDestination)(LogDestination::Printf | LogDestination::File);
-		logger.settings.keep_old_logs = false; 
 
 		if (logger.settings.source & LogDestination::File)
 		{
@@ -98,9 +144,6 @@ namespace NV1Sim
 
 		char date_buffer[LOGGING_MAX_LENGTH_DATE] = {0};
 		char log_string_buffer[LOGGING_MAX_LENGTH_TOTAL] = {0};
-
-		memset(date_buffer, 0x00, sizeof(date_buffer));
-		memset(log_string_buffer, 0x00, sizeof(log_string_buffer));
 
 		auto now = std::chrono::system_clock::now();
 		std::time_t now_time_t = std::chrono::system_clock::to_time_t(now);
@@ -171,7 +214,7 @@ namespace NV1Sim
 			// If a fatal error message is logged, we're going down,
 			// so call the fatal error function if it is safe to do so
 			if (channel & LogChannel::Fatal
-				&& !(channel & LogChannel::SuperFatal)
+			&& !(channel & LogChannel::SuperFatal)
 			&& logger.settings.fatal_function)
 			{
 				logger.settings.fatal_function();

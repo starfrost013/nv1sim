@@ -23,17 +23,18 @@ namespace NV1Sim
     #define VRAM_AMOUNT_2MB         2097152
     #define VRAM_AMOUNT_4MB         4194304
 
+    // The settings of the GPU
+    struct GPUSettings
+    {
+        uint32_t vram_amount; 
+        uint32_t straps;
+    }; 
+
     // The main class, where everything cool happens.
     class NV1
     {
 
     private: 
-        // The settings of the GPU
-        struct GPUSettings
-        {
-            uint32_t vram_amount; 
-            uint32_t straps;
-        }; 
 
         // The state of the NV1
         struct GPUState
@@ -65,6 +66,8 @@ namespace NV1Sim
         // I/O Architecture & Submission 
         struct PFIFO
         {
+            uint32_t config;
+            uint32_t cache_reassignment;            // Allow context switching?
 
         }; 
 
@@ -120,7 +123,12 @@ namespace NV1Sim
             return addr; 
         }
 
+
+        // Core Private Methods
+        void SetInterruptState();
+
     public: 
+
         // NV1 Constructor
         NV1(GPUSettings new_settings) 
         { 
@@ -149,6 +157,8 @@ namespace NV1Sim
 
             uint32_t (NV1::*read_func)(uint32_t addr);
             void (NV1::*write_func)(uint32_t addr, uint32_t value);
+
+            const char* description;
         };
 
         // nearly every register is 32bit so we can get away with this 
@@ -156,14 +166,14 @@ namespace NV1Sim
         std::unordered_map<uint32_t, NV1Mapping> mappings32 =
         {
             // PMC
-            { NV_PMC_BOOT_0, { &this->pmc.boot, nullptr, nullptr } }, 
-            { NV_PMC_INTR_0, { &this->pmc.intr, nullptr, nullptr } },
-            { NV_PMC_INTR_EN_0, { &this->pmc.intr_en, nullptr, nullptr } }, 
-            { NV_PMC_INTR_READ_0, { &this->pmc.intr_read, nullptr, nullptr } },
-            { NV_PMC_ENABLE, { &this->pmc.enable, nullptr, nullptr } },
+            { NV_PMC_BOOT_0, { &this->pmc.boot, nullptr, nullptr, nullptr } }, 
+            { NV_PMC_INTR_0, { &this->pmc.intr, nullptr, nullptr, nullptr } },
+            { NV_PMC_INTR_EN_0, { &this->pmc.intr_en, nullptr, nullptr, nullptr } }, 
+            { NV_PMC_INTR_READ_0, { &this->pmc.intr_read, nullptr, nullptr, nullptr } },
+            { NV_PMC_ENABLE, { &this->pmc.enable, nullptr, nullptr, nullptr } },
 
             // PFB
-            { NV_PFB_CONFIG_0, { &this->pfb.config, nullptr, nullptr } }, 
+            { NV_PFB_CONFIG_0, { &this->pfb.config, nullptr, nullptr, nullptr } }, 
         }; 
 
         uint32_t ReadRegister32(uint32_t addr) 

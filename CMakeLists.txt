@@ -14,9 +14,12 @@ add_executable (NV1Sim
 "core/core_input.cpp"
 "core/core_renderer.cpp"
 
+# Core - Logging
+"core/logging/logging.cpp"
+
 # NV1
 "nv/core/nv1_core.cpp"
-
+"nv/core/nv1_pfifo.cpp"
 )
 
 # Base include directories

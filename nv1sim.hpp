@@ -1,7 +1,9 @@
 #pragma once 
 #include <SDL3/SDL.h>
+#include <core/logging/logging.hpp>
 
 // Core STL
+#include <cstring>
 #include <cstdint>
 #include <cstdlib>
 #include <unordered_map>

@@ -1,6 +1,7 @@
 #include <cmath>
 #include <iostream>
 #include <core/core.hpp>
+#include <nv/nv1.hpp>
 #include "SDL3/SDL_error.h"
 #include "SDL3/SDL_events.h"
 #include "SDL3/SDL_init.h"
@@ -9,75 +10,85 @@
 
 namespace NV1Sim
 {
+    NV1* gpu;
 
-Game game = {0};               
+    Game game = {0};               
 
-bool Game_Init()
-{
-    if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_EVENTS))
-        return false; 
-
-    game.settings.screen_x = 1024;
-    game.settings.screen_y = 768;
-
-    if (!SDL_CreateWindowAndRenderer(APP_SIGNON_STRING, game.settings.screen_x, game.settings.screen_y, 0, &game.window, &game.renderer))
-        return false;
-
-   
-    game.render_target = SDL_CreateTexture(game.renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, game.settings.screen_x, game.settings.screen_y);
-
-    if (!game.render_target)
+    bool Game_Init()
     {
-        std::cout << "Failed to create render target " << SDL_GetError() << std::endl;
-        Game_Shutdown();
-    }
+        if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_EVENTS))
+            return false; 
+
+        game.settings.screen_x = 1024;
+        game.settings.screen_y = 768;
+
+        if (!SDL_CreateWindowAndRenderer(APP_SIGNON_STRING, game.settings.screen_x, game.settings.screen_y, 0, &game.window, &game.renderer))
+            return false;
     
-    game.running = true; 
-    game.tickrate = 60;
+        game.render_target = SDL_CreateTexture(game.renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, game.settings.screen_x, game.settings.screen_y);
 
-    return true; 
-}
-
-void Game_PumpEvents()
-{
-    SDL_Event next_event; 
-
-    if (SDL_PollEvent(&next_event))
-    {
-        bool w_down = false, a_down = false, s_down = false, d_down = false;
-        bool left_down = false, right_down = false, up_down = false, down_down = false;  
-
-        switch (next_event.type)
+        if (!game.render_target)
         {
-           
-            case SDL_EVENT_KEY_UP:
-                key_state[next_event.key.scancode] = false; 
-                break; 
-            case SDL_EVENT_KEY_DOWN:
-                key_state[next_event.key.scancode] = true;
-                break; 
-            case SDL_EVENT_QUIT:
-                game.running = false; 
-                break;
+            std::cout << "Failed to create render target " << SDL_GetError() << std::endl;
+            Game_Shutdown();
+        }
+        
+        game.running = true; 
+        game.tickrate = 60;
 
+        Logging_LogChannel("Initialising graphics hardware...", LogChannel::Message);
+
+        // initialise the nv1 settings
+        GPUSettings settings = {0};
+
+        settings.vram_amount = 0x400000;    // the full 4MB 
+        settings.straps = 0x7;              // test 
+
+        gpu = new NV1(settings);
+
+        return true; 
+    }
+
+    void Game_PumpEvents()
+    {
+        SDL_Event next_event; 
+
+        if (SDL_PollEvent(&next_event))
+        {
+            bool w_down = false, a_down = false, s_down = false, d_down = false;
+            bool left_down = false, right_down = false, up_down = false, down_down = false;  
+
+            switch (next_event.type)
+            {
+            
+                case SDL_EVENT_KEY_UP:
+                    key_state[next_event.key.scancode] = false; 
+                    break; 
+                case SDL_EVENT_KEY_DOWN:
+                    key_state[next_event.key.scancode] = true;
+                    break; 
+                case SDL_EVENT_QUIT:
+                    game.running = false; 
+                    break;
+
+            }
         }
     }
-}
 
-void Game_Tick()
-{
-   
-}
+    void Game_Tick()
+    {
+    
+    }
 
-bool Game_Shutdown()
-{
-    SDL_DestroyRenderer(game.renderer);
-    SDL_DestroyWindow(game.window);
+    bool Game_Shutdown()
+    {
+        SDL_DestroyRenderer(game.renderer);
+        SDL_DestroyWindow(game.window);
 
-    SDL_Quit();
+        SDL_Quit();
 
-    exit(0);
+        exit(0);
 
-    return true;
-}
+        return true;
+    }
 }

@@ -1,7 +1,6 @@
 /* "Wolfenstein 3D" styled Digital Differential Analyzer raycaster (Test Project for SDL3) */
 
 #include "SDL3/SDL_timer.h"
-#include "core/core.hpp"
 #include <NV1Sim.hpp>
 #include <core/core.hpp>
 #include <iostream>
@@ -10,6 +9,7 @@ namespace NV1Sim
 {
     int32_t nv1sim_main(int32_t argc, char** argv)
     {
+        Logging_Init();
         Game_Init();
 
         while (game.running)
