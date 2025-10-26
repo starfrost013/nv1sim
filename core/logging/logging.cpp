@@ -35,7 +35,7 @@ namespace NV1Sim
 		// 10 (max) + 1 + 4 + 1 for safety
 		char final_string[CONSOLE_COLOR_BUFFER_SIZE] = { 0 };
 
-		snprintf(final_string, CONSOLE_COLOR_BUFFER_SIZE, "%dm", color_final);
+		snprintf(final_string, CONSOLE_COLOR_BUFFER_SIZE, "%s%dm", CONSOLE_TERMINAL_COMMAND_PREFIX, = color_final);
 
 		printf("%s", final_string);
 	}
@@ -50,7 +50,7 @@ namespace NV1Sim
 		// 10 (max) + 1 + 4 + 1 for safety
 		char final_string[CONSOLE_COLOR_BUFFER_SIZE] = { 0 };
 
-		snprintf(final_string, CONSOLE_COLOR_BUFFER_SIZE, "%dm", color_final);
+		snprintf(final_string, CONSOLE_COLOR_BUFFER_SIZE, "%s%dm", CONSOLE_TERMINAL_COMMAND_PREFIX,  color_final);
 		
 		printf("%s", final_string);
 	}
