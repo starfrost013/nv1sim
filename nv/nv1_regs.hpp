@@ -705,28 +705,28 @@
 #define NV_PMC_DEBUG_0_NVBUS_PGRAPH_DISABLED             0x00000000 /* RWI-V */
 #define NV_PMC_DEBUG_0_NVBUS_PGRAPH_ENABLED              0x00000001 /* RW--V */
 #define NV_PMC_INTR_0                                    0x00000100 /* RW-4R */
-#define NV_PMC_INTR_0_PAUDIO                                    0:0 /* R--VF */
+#define NV_PMC_INTR_0_PAUDIO                                      0 /* R--VF */
 #define NV_PMC_INTR_0_PAUDIO_NOT_PENDING                 0x00000000 /* R---V */
 #define NV_PMC_INTR_0_PAUDIO_PENDING                     0x00000001 /* R---V */
-#define NV_PMC_INTR_0_PDMA                                      4:4 /* R--VF */
+#define NV_PMC_INTR_0_PDMA                                        4 /* R--VF */
 #define NV_PMC_INTR_0_PDMA_NOT_PENDING                   0x00000000 /* R---V */
 #define NV_PMC_INTR_0_PDMA_PENDING                       0x00000001 /* R---V */
-#define NV_PMC_INTR_0_PFIFO                                     8:8 /* R--VF */
+#define NV_PMC_INTR_0_PFIFO                                       8 /* R--VF */
 #define NV_PMC_INTR_0_PFIFO_NOT_PENDING                  0x00000000 /* R---V */
 #define NV_PMC_INTR_0_PFIFO_PENDING                      0x00000001 /* R---V */
-#define NV_PMC_INTR_0_PGRAPH                                  12:12 /* R--VF */
+#define NV_PMC_INTR_0_PGRAPH                                     12 /* R--VF */
 #define NV_PMC_INTR_0_PGRAPH_NOT_PENDING                 0x00000000 /* R---V */
 #define NV_PMC_INTR_0_PGRAPH_PENDING                     0x00000001 /* R---V */
-#define NV_PMC_INTR_0_PRM                                     16:16 /* R--VF */
+#define NV_PMC_INTR_0_PRM                                        16 /* R--VF */
 #define NV_PMC_INTR_0_PRM_NOT_PENDING                    0x00000000 /* R---V */
 #define NV_PMC_INTR_0_PRM_PENDING                        0x00000001 /* R---V */
-#define NV_PMC_INTR_0_PTIMER                                  20:20 /* R--VF */
+#define NV_PMC_INTR_0_PTIMER                                     20 /* R--VF */
 #define NV_PMC_INTR_0_PTIMER_NOT_PENDING                 0x00000000 /* R---V */
 #define NV_PMC_INTR_0_PTIMER_PENDING                     0x00000001 /* R---V */
-#define NV_PMC_INTR_0_PFB                                     24:24 /* R--VF */
+#define NV_PMC_INTR_0_PFB                                        24 /* R--VF */
 #define NV_PMC_INTR_0_PFB_NOT_PENDING                    0x00000000 /* R---V */
 #define NV_PMC_INTR_0_PFB_PENDING                        0x00000001 /* R---V */
-#define NV_PMC_INTR_0_SOFTWARE                                28:28 /* RWIVF */
+#define NV_PMC_INTR_0_SOFTWARE                                   28 /* RWIVF */
 #define NV_PMC_INTR_0_SOFTWARE_NOT_PENDING               0x00000000 /* RWI-V */
 #define NV_PMC_INTR_0_SOFTWARE_PENDING                   0x00000001 /* RW--V */
 #define NV_PMC_INTR_EN_0                                 0x00000140 /* RW-4R */
@@ -3118,21 +3118,22 @@
 #define NV_PRAMPW                             0x00606FFF:0x00606000 /* RW--D */
 
 #define NV_PEXTDEV                            0x00608FFF:0x00608000 /* RW--D */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#define NV_PEXTDEV_BOOT_0                                0x00608000 /* R--4R */
+#define NV_PEXTDEV_BOOT_0_STRAP_VENDOR                          0:0 /* R-XVF */
+#define NV_PEXTDEV_BOOT_0_STRAP_VENDOR_NVIDIA            0x00000000 /* R---V */
+#define NV_PEXTDEV_BOOT_0_STRAP_VENDOR_SGS               0x00000001 /* R---V */
+#define NV_PEXTDEV_BOOT_0_STRAP_RAM_TYPE                        1:1 /* R-XVF */
+#define NV_PEXTDEV_BOOT_0_STRAP_RAM_TYPE_VRAM            0x00000000 /* R---V */
+#define NV_PEXTDEV_BOOT_0_STRAP_RAM_TYPE_DRAM            0x00000001 /* R---V */
+#define NV_PEXTDEV_BOOT_0_STRAP_BOARD                           3:2 /* R-XVF */
+#define NV_PEXTDEV_BOOT_0_STRAP_BOARD_MOTHER             0x00000000 /* R---V */
+#define NV_PEXTDEV_BOOT_0_STRAP_BOARD_ADAPTER_1          0x00000001 /* R---V */
+#define NV_PEXTDEV_BOOT_0_STRAP_BOARD_ADAPTER_2          0x00000002 /* R---V */
+#define NV_PEXTDEV_BOOT_0_STRAP_BOARD_ADAPTER_3          0x00000003 /* R---V */
+#define NV_PEXTDEV_BOOT_0_STRAP_BUS_TYPE                        4:4 /* R-XVF */
+#define NV_PEXTDEV_BOOT_0_STRAP_BUS_TYPE_PCI             0x00000000 /* R---V */
+#define NV_PEXTDEV_BOOT_0_STRAP_BUS_TYPE_VL              0x00000001 /* R---V */
+#define NV_PEXTDEV_BOOT_0_STRAP_RESERVED                        7:5 /* R-XVF */
 
 
 #define NV_PDAC                               0x00609FFF:0x00609000 /* RW--D */

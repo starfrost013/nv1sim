@@ -21,7 +21,9 @@ namespace NV1Sim
         {
             // Methods are write-only
             void (NV1UBase::*function)();
-            const char* 
+            const char* name;
+            uint32_t start;
+            uint32_t end;
         };
 
         // Methods below 0x0100 are here

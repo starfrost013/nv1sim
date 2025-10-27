@@ -57,23 +57,60 @@ namespace NV1Sim
 
         };
 
+
         // Real-Mode Communication
         struct PRMC
         {
 
         };
 
+        // Real-Mode I/O
+        struct PRM
+        {
+            uint32_t intr;                  // Interrupt status
+            uint32_t intr_en;               // Master Interrupt Enable
+            PRMC rmc;
+        };
+
+        // Cache for object storage
+        // TODO: Consider separating pull0/1
+        struct PFIFOCache
+        {
+            uint32_t push_access_enable;
+            uint32_t push_channel_id;
+            uint32_t pull0;                         // bit8 - hw/sw device; bit4 - ramht hash generation success indicator; bit0-access enabled
+            uint32_t pull1;                         // bit8 - object changed; bit4 - context clean/dity; bit2:0 - subchannel [0-7]
+            uint32_t status;
+            uint32_t get_address;
+            uint32_t put_address;
+            uint32_t context[NV_PFIFO_CACHE1_CTX__SIZE_1];
+        };
+
+        // PFIFO cache entry
+        struct PFIFOCacheEntry
+        {
+            uint32_t method;                        // Method
+            uint32_t param;                             // Parameter for the object method
+        };
+
         // I/O Architecture & Submission 
         struct PFIFO
         {
+            uint32_t intr;                  // Interrupt status
+            uint32_t intr_en;               // Master Interrupt Enable
             uint32_t config;
             uint32_t cache_reassignment;            // Allow context switching?
-
+            PFIFOCache cache0;
+            PFIFOCacheEntry cache0_data;            // PFIFO (CACHE0 - software method injection) context
+            PFIFOCache cache1;
+            PFIFOCacheEntry cache1_data[NV_PFIFO_CACHE1_METHOD__SIZE_1];            // PFIFO (CACHE1 - general submission) Gray code context
         }; 
 
         // Framebuffer interface & control
         struct PFB
         {
+            uint32_t intr;                  // Interrupt status
+            uint32_t intr_en;               // Master Interrupt Enable
             uint32_t config; 
         };
 
@@ -86,19 +123,32 @@ namespace NV1Sim
         // 2D & 3D Rendering Engine 
         struct PGRAPH
         {
-
+            uint32_t intr_0;                // Interrupt status
+            uint32_t intr_1;                // Interrupt status
+            uint32_t intr_en_0;             // Master Interrupt Enable
+            uint32_t intr_en_1;             // Master Interrupt Enable
         };
 
         // Audio engine
         struct PAUDIO
         {
-
+            uint32_t intr;                  // Interrupt status
+            uint32_t intr_en;               // Master Interrupt Enable
         };
 
         // DRM & Authentication Engine
         struct PAUTH
         {
 
+        };
+
+        // Programmable Interval Timer on-die
+        struct PTIMER
+        {
+            uint32_t intr;                  // Interrupt status
+            uint32_t intr_en;               // Master Interrupt Enable
+            uint32_t numerator;
+            uint32_t denominator;
         };
 
         GPUSettings settings;
@@ -143,13 +193,14 @@ namespace NV1Sim
         };
 
         PMC pmc;
-        PRMC prmc; 
+        PRM prm; 
         PFIFO pfifo;
         PFB pfb;
         PBUS pbus;
         PGRAPH pgraph;
         PAUDIO paudio;
         PAUTH pauth;
+        PTIMER ptimer; 
     
         struct NV1Mapping
         {
