@@ -63,7 +63,7 @@ namespace NV1Sim
         if (pmc.intr & NV_PMC_INTR_0_SOFTWARE) 
         {
             if (pmc.intr_en & NV_PMC_INTR_EN_0_INTA_SOFTWARE)
-                Logging_LogChannel("Software interrupt!", NV1Sim::LogChannel);
+                Logging_LogChannel("Software interrupt!", LogChannel::Debug);
         }
     }
 
