@@ -29,7 +29,7 @@ namespace NV1Sim
 
         if (!game.render_target)
         {
-            std::cout << "Failed to create render target " << SDL_GetError() << std::endl;
+            Logging_LogChannel("Failed to create render target: %s", LogChannel::Fatal, SDL_GetError());
             Game_Shutdown();
         }
         
@@ -45,6 +45,8 @@ namespace NV1Sim
         settings.straps = 0x7;              // test 
 
         gpu = new NV1(settings);
+
+        gpu->Start();
 
         return true; 
     }

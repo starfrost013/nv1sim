@@ -2908,9 +2908,9 @@
 #define NV_PFB_BOOT_0_RAM_HYPER_PAGE_ENABLED             0x00000001 /* RW--V */
 
 // Memory timing stuff doesn't matter
-#define NV_PFB_BOOT_0_NV1SIM_GENERIC_1MB                 (NV_PFB_BOOT_0_DAC_WIDTH_64_BIT << 8) | NV_PFB_BOOT_0_RAM_AMOUNT_1MB;
-#define NV_PFB_BOOT_0_NV1SIM_GENERIC_2MB                 (NV_PFB_BOOT_0_DAC_WIDTH_64_BIT << 8) | NV_PFB_BOOT_0_RAM_AMOUNT_2MB;
-#define NV_PFB_BOOT_0_NV1SIM_GENERIC_4MB                 (NV_PFB_BOOT_0_DAC_WIDTH_64_BIT << 8) | NV_PFB_BOOT_0_RAM_AMOUNT_4MB;
+#define NV_PFB_BOOT_0_NV1SIM_GENERIC_1MB                 (NV_PFB_BOOT_0_DAC_WIDTH_64_BIT << 8) | NV_PFB_BOOT_0_RAM_AMOUNT_1MB
+#define NV_PFB_BOOT_0_NV1SIM_GENERIC_2MB                 (NV_PFB_BOOT_0_DAC_WIDTH_64_BIT << 8) | NV_PFB_BOOT_0_RAM_AMOUNT_2MB
+#define NV_PFB_BOOT_0_NV1SIM_GENERIC_4MB                 (NV_PFB_BOOT_0_DAC_WIDTH_64_BIT << 8) | NV_PFB_BOOT_0_RAM_AMOUNT_4MB
 
 #define NV_PFB_DELAY_0                                   0x00600040 /* RW-4R */
 #define NV_PFB_DELAY_0_SYNC                                     4:0 /* RWIUF */

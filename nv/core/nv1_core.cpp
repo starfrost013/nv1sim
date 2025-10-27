@@ -14,25 +14,26 @@ namespace NV1Sim
     // Initialise constants
     void NV1::StaticInit()
     {  
-        pmc.boot = NV_PMC_BOOT_0_CONSTANT_NV1_B03;
-        
+        WriteRegister32(NV_PMC_BOOT_0, NV_PMC_BOOT_0_CONSTANT_NV1_B03);
+
         switch (settings.vram_amount)
         {
             //todo: #define this
             case 0x100000:
-                pfb.boot = NV_PFB_BOOT_0_NV1SIM_GENERIC_1MB;
+                WriteRegister32(NV_PFB_BOOT_0, NV_PFB_BOOT_0_NV1SIM_GENERIC_1MB);
                 break;
             case 0x200000:
-                pfb.boot = NV_PFB_BOOT_0_NV1SIM_GENERIC_2MB;
+                WriteRegister32(NV_PFB_BOOT_0, NV_PFB_BOOT_0_NV1SIM_GENERIC_2MB);
                 break;
             case 0x400000:
-                pfb.boot = NV_PFB_BOOT_0_NV1SIM_GENERIC_2MB;
+                WriteRegister32(NV_PFB_BOOT_0, NV_PFB_BOOT_0_NV1SIM_GENERIC_4MB);
                 break;
         }
 
+        WriteRegister32(NV_PEXTDEV_BOOT_0, (NV_PEXTDEV_BOOT_0_STRAP_BOARD_ADAPTER_1 << NV_PEXTDEV_BOOT_0_STRAP_BOARD)
+        | (NV_PEXTDEV_BOOT_0_STRAP_VENDOR_NVIDIA << NV_PEXTDEV_BOOT_0_STRAP_VENDOR));
         // rest don't really matter, and these don't really matter but w/e
-        straps = (NV_PEXTDEV_BOOT_0_STRAP_BOARD_ADAPTER_1 << NV_PEXTDEV_BOOT_0_STRAP_BOARD)
-        | (NV_PEXTDEV_BOOT_0_STRAP_VENDOR_NVIDIA << NV_PEXTDEV_BOOT_0_STRAP_VENDOR);
+        
     }
 
     // Sets the interrupt state of the NV1

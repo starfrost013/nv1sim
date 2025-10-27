@@ -193,6 +193,8 @@ namespace NV1Sim
             state.running = false;
 
             StaticInit();
+
+            Logging_LogChannel("NV1 init completed. Video RAM = %d MB", LogChannel::Message, settings.vram_amount >> 20);
         };
 
         PMC pmc;                                // Master control
@@ -250,10 +252,14 @@ namespace NV1Sim
 
         void WriteRegister32(uint32_t addr, uint32_t value)
         { 
-            if (mappings32[addr].write_func)
-                (this->*this->mappings32[addr].write_func)(addr, value);
-            else 
-                *mappings32[addr].reg = value; 
+            if (addr <= NV_USER_START)
+            {
+                if (mappings32[addr].write_func)
+                    (this->*this->mappings32[addr].write_func)(addr, value);
+                else 
+                    *mappings32[addr].reg = value; 
+            }
+
         };
 
         uint8_t ReadVRAM8(uint32_t addr) { return state.video_ram8[addr]; }; 

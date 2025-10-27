@@ -10,5 +10,8 @@
 
 namespace NV1Sim
 {
-    
+    class NV1UBeta : NV1UBase
+    {
+        uint32_t beta_factor;
+    };
 }
