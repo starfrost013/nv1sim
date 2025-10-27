@@ -230,7 +230,11 @@ namespace NV1Sim
             { NV_PMC_ENABLE, { &this->pmc.enable, nullptr, nullptr, nullptr } },
 
             // PFB
+            { NV_PFB_BOOT_0, { &this->pfb.boot, nullptr, nullptr, "Framebuffer Manufacture-Time Configuration"}},
             { NV_PFB_CONFIG_0, { &this->pfb.config, nullptr, nullptr, nullptr } }, 
+            
+            // PEXTDEV/STRAPS
+            { NV_PEXTDEV_BOOT_0, { &this->straps, nullptr, nullptr, "Straps (OEM Configuration)"} }, 
         }; 
 
         void Start()
