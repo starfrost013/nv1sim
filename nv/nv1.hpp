@@ -12,7 +12,7 @@
 // Everything is 32-bit. All I/O, except to VGA, is 32-bit.
 //
 
-
+#pragma once
 #include <nv1sim.hpp>
 #include "nv1_regs.hpp"
 
@@ -109,9 +109,10 @@ namespace NV1Sim
         // Framebuffer interface & control
         struct PFB
         {
+            uint32_t boot;                  // Boot register
             uint32_t intr;                  // Interrupt status
             uint32_t intr_en;               // Master Interrupt Enable
-            uint32_t config; 
+            uint32_t config;                // Configuration 
         };
 
         // Bus Interface
@@ -173,9 +174,9 @@ namespace NV1Sim
             return addr; 
         }
 
-
+        void StaticInit();
         // Core Private Methods
-        void SetInterruptState();
+        void FirePendingInterrupts();
 
     public: 
 
@@ -190,17 +191,20 @@ namespace NV1Sim
             state.video_ram8 = (uint8_t*)state.video_ram32;
             
             state.running = false;
+
+            StaticInit();
         };
 
-        PMC pmc;
-        PRM prm; 
-        PFIFO pfifo;
-        PFB pfb;
-        PBUS pbus;
-        PGRAPH pgraph;
-        PAUDIO paudio;
-        PAUTH pauth;
-        PTIMER ptimer; 
+        PMC pmc;                                // Master control
+        PRM prm;                                // Real-mode I/O
+        PFIFO pfifo;                            // FIFO for object submission
+        PFB pfb;                                // Framebuffer Interface
+        PBUS pbus;                              // Bus
+        PGRAPH pgraph;                          // 2D/3D Graphics
+        PAUDIO paudio;                          // Audio Engine
+        PAUTH pauth;                            // DRM
+        PTIMER ptimer;                          // Programmable interval timer
+        uint32_t straps;                        // OEM Configuration
     
         struct NV1Mapping
         {
@@ -217,7 +221,7 @@ namespace NV1Sim
         std::unordered_map<uint32_t, NV1Mapping> mappings32 =
         {
             // PMC
-            { NV_PMC_BOOT_0, { &this->pmc.boot, nullptr, nullptr, nullptr } }, 
+            { NV_PMC_BOOT_0, { &this->pmc.boot, nullptr, nullptr } }, 
             { NV_PMC_INTR_0, { &this->pmc.intr, nullptr, nullptr, nullptr } },
             { NV_PMC_INTR_EN_0, { &this->pmc.intr_en, nullptr, nullptr, nullptr } }, 
             { NV_PMC_INTR_READ_0, { &this->pmc.intr_read, nullptr, nullptr, nullptr } },
@@ -227,12 +231,21 @@ namespace NV1Sim
             { NV_PFB_CONFIG_0, { &this->pfb.config, nullptr, nullptr, nullptr } }, 
         }; 
 
+        void Start()
+        {
+            state.running = true;
+        }
+
         uint32_t ReadRegister32(uint32_t addr) 
         { 
-            if (mappings32[addr].read_func)
-                return (this->*this->mappings32[addr].read_func)(addr);
-            else
-                return *mappings32[addr].reg; 
+            if (addr <= NV_USER_START)
+            {
+                if (mappings32[addr].read_func)
+                    return (this->*this->mappings32[addr].read_func)(addr);
+                else
+                    return *mappings32[addr].reg; 
+            }
+
         };
 
         void WriteRegister32(uint32_t addr, uint32_t value)

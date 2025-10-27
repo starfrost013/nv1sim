@@ -5,6 +5,7 @@
 // nv1_class.hpp: Base for NV1 CLASS METHODS implementation
 //
 
+#pragma once
 #include <nv/nv1.hpp>
 
 namespace NV1Sim
@@ -12,11 +13,6 @@ namespace NV1Sim
     class NV1UBase
     {
     public: 
-        virtual NV1MethodMapping GetMapping(uint32_t addr) = 0;
-    
-    private: 
-        NV1 &gpu;
-
         struct NV1MethodMapping
         {
             // Methods are write-only
@@ -26,9 +22,22 @@ namespace NV1Sim
             uint32_t end;
         };
 
+        NV1UBase(NV1* gpuref)
+        {
+            gpu = gpuref; 
+        }  
+    
+        virtual NV1MethodMapping GetMapping(uint32_t addr)
+        {
+            return baseMappings[addr]; 
+        };
+    private: 
+        NV1* gpu;
+
+
         // Methods below 0x0100 are here
         std::unordered_map<uint32_t, NV1MethodMapping> baseMappings;
 
 
-    }
+    };
 }

@@ -1,5 +1,5 @@
 //
-// Stepping C NV1 registers
+// Stepping B3/C NV1 registers
 //
 
 #pragma once
@@ -697,6 +697,13 @@
 #define NV_PMC_BOOT_0_MANUFACTURER                            31:24 /* R--VF */
 #define NV_PMC_BOOT_0_MANUFACTURER_NVIDIA                0x00000000 /* R---V */
 #define NV_PMC_BOOT_0_MANUFACTURER_SGS                   0x00000001 /* R---V */
+
+#define NV_PMC_BOOT_0_CONSTANT_NV1_A01                   0x00010100 // NVidia NV1 Revision A (Prototype - 1994)
+#define NV_PMC_BOOT_0_CONSTANT_NV1_B01                   0x00010101 // NVidia NV1 Revision B01 (Prototype - 1995)
+#define NV_PMC_BOOT_0_CONSTANT_NV1_B02                   0x00010102 // NVidia NV1 Revision B02 (Prototype - 1995)
+#define NV_PMC_BOOT_0_CONSTANT_NV1_B03                   0x00010103 // NVidia NV1 Revision B03 
+#define NV_PMC_BOOT_0_CONSTANT_NV1_C01                   0x00010104 // NVidia NV1 Revision C01
+
 #define NV_PMC_DEBUG_0                                   0x00000080 /* R--4R */
 #define NV_PMC_DEBUG_0_NVBUS_PAUDIO                             0:0 /* RWIVF */
 #define NV_PMC_DEBUG_0_NVBUS_PAUDIO_DISABLED             0x00000000 /* RWI-V */
@@ -2899,6 +2906,12 @@
 #define NV_PFB_BOOT_0_RAM_HYPER_PAGE                          28:28 /* RWIVF */
 #define NV_PFB_BOOT_0_RAM_HYPER_PAGE_DISABLED            0x00000000 /* RWI-V */
 #define NV_PFB_BOOT_0_RAM_HYPER_PAGE_ENABLED             0x00000001 /* RW--V */
+
+// Memory timing stuff doesn't matter
+#define NV_PFB_BOOT_0_NV1SIM_GENERIC_1MB                 (NV_PFB_BOOT_0_DAC_WIDTH_64_BIT << 8) | NV_PFB_BOOT_0_RAM_AMOUNT_1MB;
+#define NV_PFB_BOOT_0_NV1SIM_GENERIC_2MB                 (NV_PFB_BOOT_0_DAC_WIDTH_64_BIT << 8) | NV_PFB_BOOT_0_RAM_AMOUNT_2MB;
+#define NV_PFB_BOOT_0_NV1SIM_GENERIC_4MB                 (NV_PFB_BOOT_0_DAC_WIDTH_64_BIT << 8) | NV_PFB_BOOT_0_RAM_AMOUNT_4MB;
+
 #define NV_PFB_DELAY_0                                   0x00600040 /* RW-4R */
 #define NV_PFB_DELAY_0_SYNC                                     4:0 /* RWIUF */
 #define NV_PFB_DELAY_0_SYNC_0                            0x00000000 /* RWI-V */
@@ -3119,21 +3132,21 @@
 
 #define NV_PEXTDEV                            0x00608FFF:0x00608000 /* RW--D */
 #define NV_PEXTDEV_BOOT_0                                0x00608000 /* R--4R */
-#define NV_PEXTDEV_BOOT_0_STRAP_VENDOR                          0:0 /* R-XVF */
+#define NV_PEXTDEV_BOOT_0_STRAP_VENDOR                            0 /* R-XVF */
 #define NV_PEXTDEV_BOOT_0_STRAP_VENDOR_NVIDIA            0x00000000 /* R---V */
 #define NV_PEXTDEV_BOOT_0_STRAP_VENDOR_SGS               0x00000001 /* R---V */
-#define NV_PEXTDEV_BOOT_0_STRAP_RAM_TYPE                        1:1 /* R-XVF */
+#define NV_PEXTDEV_BOOT_0_STRAP_RAM_TYPE                          1 /* R-XVF */
 #define NV_PEXTDEV_BOOT_0_STRAP_RAM_TYPE_VRAM            0x00000000 /* R---V */
 #define NV_PEXTDEV_BOOT_0_STRAP_RAM_TYPE_DRAM            0x00000001 /* R---V */
-#define NV_PEXTDEV_BOOT_0_STRAP_BOARD                           3:2 /* R-XVF */
+#define NV_PEXTDEV_BOOT_0_STRAP_BOARD                             2 /* R-XVF */
 #define NV_PEXTDEV_BOOT_0_STRAP_BOARD_MOTHER             0x00000000 /* R---V */
 #define NV_PEXTDEV_BOOT_0_STRAP_BOARD_ADAPTER_1          0x00000001 /* R---V */
 #define NV_PEXTDEV_BOOT_0_STRAP_BOARD_ADAPTER_2          0x00000002 /* R---V */
 #define NV_PEXTDEV_BOOT_0_STRAP_BOARD_ADAPTER_3          0x00000003 /* R---V */
-#define NV_PEXTDEV_BOOT_0_STRAP_BUS_TYPE                        4:4 /* R-XVF */
+#define NV_PEXTDEV_BOOT_0_STRAP_BUS_TYPE                          4 /* R-XVF */
 #define NV_PEXTDEV_BOOT_0_STRAP_BUS_TYPE_PCI             0x00000000 /* R---V */
 #define NV_PEXTDEV_BOOT_0_STRAP_BUS_TYPE_VL              0x00000001 /* R---V */
-#define NV_PEXTDEV_BOOT_0_STRAP_RESERVED                        7:5 /* R-XVF */
+#define NV_PEXTDEV_BOOT_0_STRAP_RESERVED                          5 /* R-XVF */
 
 
 #define NV_PDAC                               0x00609FFF:0x00609000 /* RW--D */
@@ -3419,7 +3432,9 @@
 
 #define NV_PRAMIN                             0x007FFFFF:0x00700000 /* RW--D */
 
-#define NV_USER                               0x00FFFFFF:0x00800000 /* RW--D */
+#define NV_USER_START                                    0x00800000 /* RW--D */
+#define NV_USER_END                                      0x00FFFFFF /* RW--D */
+
 #define NV_USER_OBJECT(i,j)     (0x00800000+(i)*0x10000+(j)*0x2000) /* -W-4A */
 #define NV_USER_OBJECT__SIZE_1                                  128 /*       */
 #define NV_USER_OBJECT__SIZE_2                                    8 /*       */

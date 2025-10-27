@@ -20,6 +20,9 @@ add_executable (NV1Sim
 # NV1
 "nv/core/nv1_core.cpp"
 "nv/core/nv1_pfifo.cpp"
+
+# NV1 Classes
+"nv/classes/nv1_ubeta.cpp"
 )
 
 # Base include directories
