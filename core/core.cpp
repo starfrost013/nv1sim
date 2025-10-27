@@ -7,6 +7,7 @@
 #include "SDL3/SDL_init.h"
 #include "SDL3/SDL_render.h"
 #include "SDL3/SDL_video.h"
+#include "imgui_impl_sdl3.h"
 
 namespace NV1Sim
 {
@@ -36,6 +37,9 @@ namespace NV1Sim
         game.running = true; 
         game.tickrate = 60;
 
+        Game_InitUI();
+
+        // we're done, move onto nv1 init
         Logging_LogChannel("Initialising graphics hardware...", LogChannel::Message);
 
         // initialise the nv1 settings
@@ -53,6 +57,7 @@ namespace NV1Sim
 
     void Game_PumpEvents()
     {
+
         SDL_Event next_event; 
 
         if (SDL_PollEvent(&next_event))

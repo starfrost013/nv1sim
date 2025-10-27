@@ -9,10 +9,21 @@ add_executable (NV1Sim
 
 "NV1Sim.cpp"
 
+# IMGui
+"external/imgui/imgui.cpp"
+"external/imgui/imgui_demo.cpp"
+"external/imgui/imgui_draw.cpp"
+"external/imgui/imgui_tables.cpp"
+"external/imgui/imgui_widgets.cpp"
+"external/imgui/backends/imgui_impl_sdl3.cpp"
+"external/imgui/backends/imgui_impl_sdlgpu3.cpp"
+
 # Core
+
 "core/core.cpp"
 "core/core_input.cpp"
 "core/core_renderer.cpp"
+"core/core_ui.cpp"
 
 # Core - Logging
 "core/logging/logging.cpp"
@@ -29,6 +40,9 @@ add_executable (NV1Sim
 include_directories(".")
 # Required for glad for now
 include_directories(${CMAKE_SOURCE_DIR}"/external/sdl3/x86_64-w64-mingw32/include")
+# IMGUI
+include_directories(${CMAKE_SOURCE_DIR}"/external/imgui")
+include_directories(${CMAKE_SOURCE_DIR}"/external/imgui/backends")
 
 # Libraries and copiler specific stuff
 
