@@ -1,6 +1,7 @@
 /* "Wolfenstein 3D" styled Digital Differential Analyzer raycaster (Test Project for SDL3) */
 
 #include "SDL3/SDL_timer.h"
+#include "core/core.hpp"
 #include <NV1Sim.hpp>
 #include <core/core.hpp>
 #include <iostream>
@@ -17,6 +18,7 @@ namespace NV1Sim
             uint64_t time_now = SDL_GetTicksNS();
         
             Game_PumpEvents();
+            Game_StartRenderUI();
 
             if (time_now > (game.last_tick_time + (NS_PER_SECOND)))
             {
@@ -28,6 +30,7 @@ namespace NV1Sim
 
             Game_RenderLevel();
 
+            Game_EndRenderUI();
             SDL_RenderPresent(game.renderer);
         }
 

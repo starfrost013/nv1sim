@@ -1,10 +1,13 @@
 /* Core SDL init/shutdown code */
 #pragma once
+#include "SDL3/SDL_gpu.h"
 #include "SDL3/SDL_scancode.h"
 #include <nv1sim.hpp>
 
 namespace NV1Sim
 {
+    #define NS_PER_SECOND 1000000000
+
     /* Game states */
     enum GameState 
     {
@@ -18,17 +21,20 @@ namespace NV1Sim
         uint32_t screen_y;
     };
 
-    #define NS_PER_SECOND 1000000000
 
     struct Game
     {
-        SDL_Window* window;         // SDL Window
-        SDL_Renderer* renderer;     // SDL Renderer
-        SDL_Texture* render_target;  // Texture that gets blited to the display
-        uint32_t tickrate;          // The game's tickrate
-        uint64_t last_tick_time;    // last frame time in nanoseconds (returned by SDL_GetTicksNS)
-        GameSettings settings;      // Game settings
-        bool running;               // Determines if the game is running.
+        SDL_Window* window;             // SDL Window
+        SDL_Renderer* renderer;         // SDL Renderer
+        SDL_Texture* render_target;     // Texture that gets blited to the display
+        uint32_t tickrate;              // The game's tickrate
+        uint64_t last_tick_time;        // last frame time in nanoseconds (returned by SDL_GetTicksNS)
+        GameSettings settings;          // Game settings
+        bool running;                   // Determines if the game is running.
+
+        // We don't really use this. But IMGUI does.
+        SDL_GPUDevice* gpu_device; 
+        
     };
 
     extern Game game; 

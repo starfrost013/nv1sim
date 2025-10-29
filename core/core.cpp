@@ -4,6 +4,7 @@
 #include <nv/nv1.hpp>
 #include "SDL3/SDL_error.h"
 #include "SDL3/SDL_events.h"
+#include "SDL3/SDL_gpu.h"
 #include "SDL3/SDL_init.h"
 #include "SDL3/SDL_render.h"
 #include "SDL3/SDL_video.h"
@@ -22,10 +23,33 @@ namespace NV1Sim
 
         game.settings.screen_x = 1024;
         game.settings.screen_y = 768;
-
-        if (!SDL_CreateWindowAndRenderer(APP_SIGNON_STRING, game.settings.screen_x, game.settings.screen_y, 0, &game.window, &game.renderer))
-            return false;
     
+        game.window = SDL_CreateWindow(APP_SIGNON_STRING, game.settings.screen_x, game.settings.screen_y, 0);
+
+        if (!game.window)
+        {
+            Logging_LogChannel("Failed to allocate SDL window: %s", LogChannel::Fatal, SDL_GetError());
+            return false;
+        }
+    
+        game.gpu_device = SDL_CreateGPUDevice(SDL_GPU_SHADERFORMAT_SPIRV | SDL_GPU_SHADERFORMAT_DXIL, true, nullptr);
+
+        if (!game.gpu_device)
+        {
+            Logging_LogChannel("Failed to allocate SDL_GPU device: %s", LogChannel::Fatal, SDL_GetError());
+            return false; 
+        }
+
+        if (!SDL_ClaimWindowForGPUDevice(game.gpu_device, game.window))
+        {
+            Logging_LogChannel("Failed to claim window for GPU device: %s", LogChannel::Fatal, SDL_GetError());
+            return false;
+        }
+        
+        // these must be the same as the InitSDLGPU3 call
+        SDL_SetGPUSwapchainParameters(game.gpu_device, game.window, SDL_GPU_SWAPCHAINCOMPOSITION_SDR, SDL_GPU_PRESENTMODE_VSYNC);
+
+        /*
         game.render_target = SDL_CreateTexture(game.renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, game.settings.screen_x, game.settings.screen_y);
 
         if (!game.render_target)
@@ -33,7 +57,7 @@ namespace NV1Sim
             Logging_LogChannel("Failed to create render target: %s", LogChannel::Fatal, SDL_GetError());
             Game_Shutdown();
         }
-        
+        */
         game.running = true; 
         game.tickrate = 60;
 
@@ -62,6 +86,9 @@ namespace NV1Sim
 
         if (SDL_PollEvent(&next_event))
         {
+            // first send the event down into UI
+            ImGui_ImplSDL3_ProcessEvent(&next_event);
+
             bool w_down = false, a_down = false, s_down = false, d_down = false;
             bool left_down = false, right_down = false, up_down = false, down_down = false;  
 
