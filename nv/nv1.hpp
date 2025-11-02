@@ -13,6 +13,7 @@
 //
 
 #pragma once
+#include <functional>
 #include <nv1sim.hpp>
 #include "nv1_regs.hpp"
 
@@ -35,6 +36,8 @@ namespace NV1Sim
     {
 
     private: 
+        typedef uint32_t (NV1::*GpuReadRegFn)(); 
+        typedef void (NV1::*GpuWriteRegFn)(uint32_t value);
 
         // The state of the NV1
         struct GPUState
@@ -90,20 +93,24 @@ namespace NV1Sim
         struct PFIFOCacheEntry
         {
             uint32_t method;                        // Method
-            uint32_t param;                             // Parameter for the object method
+            uint32_t param;                         // Parameter for the object method
         };
 
         // I/O Architecture & Submission 
         struct PFIFO
         {
-            uint32_t intr;                  // Interrupt status
-            uint32_t intr_en;               // Master Interrupt Enable
+            uint32_t intr;                          // Interrupt status
+            uint32_t intr_en;                       // Master Interrupt Enable
             uint32_t config;
             uint32_t cache_reassignment;            // Allow context switching?
             PFIFOCache cache0;
             PFIFOCacheEntry cache0_data;            // PFIFO (CACHE0 - software method injection) context
             PFIFOCache cache1;
             PFIFOCacheEntry cache1_data[NV_PFIFO_CACHE1_METHOD__SIZE_1];            // PFIFO (CACHE1 - general submission) Gray code context
+        
+            uint32_t runout_status;
+            uint32_t runout_get_address;
+            uint32_t runout_put_address;
         }; 
 
         // Framebuffer interface & control
@@ -121,13 +128,81 @@ namespace NV1Sim
 
         }; 
 
-        // 2D & 3D Rendering Engine 
+        // 2D & 3D Rendering Engine ("BPORT" probably not needed)
         struct PGRAPH
         {
+            uint32_t debug_0;
+            uint32_t debug_1;
+            uint32_t debug_2;
+            uint32_t debug_3; 
             uint32_t intr_0;                // Interrupt status
             uint32_t intr_1;                // Interrupt status
             uint32_t intr_en_0;             // Master Interrupt Enable
             uint32_t intr_en_1;             // Master Interrupt Enable
+            uint32_t ctx_switch;            // this is format of grobj pointed to in ramht
+            uint32_t ctx_control;           // misc
+            uint32_t misc;
+            uint32_t status; 
+            uint32_t trapped_addr;
+            uint32_t trapped_data;
+            uint32_t canvas_misc;
+            uint32_t clip0_min;             // 31:16 - y, 15:0 - x
+            uint32_t clip0_max;             // 31:16 - y, 15:0 - x
+            uint32_t clip1_min;             // 31:16 - y, 15:0 - x
+            uint32_t clip1_max;             // 31:16 - y, 15:0 - x
+            uint32_t clip_misc;
+            uint32_t notify;
+            // do we need DMA register? in effect all dma registers are contiguous!
+
+            // pattern shit (slightly renamed frrom original NV registers)
+            uint32_t patt_0_rgb;
+            uint32_t patt_0_a;
+            uint32_t patt_1_rgb;
+            uint32_t patt_1_a;
+            uint32_t pattern_bitmap_high;   // 63:32 
+            uint32_t pattern_bitmap_low;    // 31:0
+            uint32_t pattern_shape;         // 0 - 8x8; 1 - 64x1; 2 - 1x64
+            uint32_t mono_color0;           // colour expanded bitblit
+            uint32_t mono_color1;           // colour expanded bitblit
+            uint32_t rop3;                  // GDI ROP3
+            uint32_t chroma_key;            // Colour Key for Operations
+            uint32_t beta;                  // Beta factor for blending
+
+            // XY logic (do we need this? this is most likely how PGRAPH plots pixels to PFB)
+            uint32_t abs_x_ram[NV_PGRAPH_XY_LOGIC_RAM_SIZE]; // absolute
+            uint32_t rel_x_ram[NV_PGRAPH_XY_LOGIC_RAM_SIZE]; // relative
+            uint32_t x_ram[NV_PGRAPH_XY_LOGIC_RAM_SIZE];
+            uint32_t rel_y_ram[NV_PGRAPH_XY_LOGIC_RAM_SIZE];
+            uint32_t abs_y_ram[NV_PGRAPH_XY_LOGIC_RAM_SIZE];
+
+            uint32_t xy_logic_misc0;
+            uint32_t xy_logic_misc1;
+            uint32_t x_misc;
+            uint32_t y_misc;
+
+            uint32_t abs_uclip_xmin;
+            uint32_t abs_uclip_xmax;
+            uint32_t abs_uclip_ymin;
+            uint32_t abs_uclip_ymax;
+            uint32_t rel_uclip_xmin;
+            uint32_t rel_uclip_xmax;
+            uint32_t rel_uclip_ymin;
+            uint32_t rel_uclip_ymax;
+
+            uint32_t abs_iclip_xmax;
+            uint32_t abs_iclip_ymax;
+            uint32_t rel_iclip_xmax;
+            uint32_t rel_iclip_ymax;
+
+            // Subdivision for quad patching
+            uint32_t source_color;
+            uint32_t subdivide; 
+            uint32_t exceptions;
+            uint32_t edgefill;
+
+            uint32_t beta_factor_ram[NV_PGRAPH_BETA_RAM__SIZE_1];
+            uint32_t bit33;         // overflow
+
         };
 
         // Audio engine
@@ -152,8 +227,23 @@ namespace NV1Sim
             uint32_t denominator;
         };
 
-        GPUSettings settings;
-        GPUState state;
+        // RAMIN config
+        struct PRAM
+        {
+            uint32_t config;
+
+            // locations of structures within ramin
+            uint32_t ramht_start;
+            uint32_t ramht_size;
+            uint32_t ramro_start;
+            uint32_t ramro_size;
+            uint32_t ramfc_start;
+            uint32_t ramfc_size;
+            uint32_t ramau_start;
+            uint32_t ramau_size;
+            uint32_t rampw_start;
+            uint32_t rampw_size;    
+        };
 
         // Move to private cpp file?
         inline __attribute__((always_inline)) uint32_t GetRAMINAddress(uint32_t addr)
@@ -206,14 +296,19 @@ namespace NV1Sim
         PAUDIO paudio;                          // Audio Engine
         PAUTH pauth;                            // DRM
         PTIMER ptimer;                          // Programmable interval timer
+        PRAM pram;
         uint32_t straps;                        // OEM Configuration
-    
+
+        GPUSettings settings;
+        GPUState state;
+
         struct NV1Mapping
         {
             uint32_t* reg;
 
-            uint32_t (NV1::*read_func)(uint32_t addr);
-            void (NV1::*write_func)(uint32_t addr, uint32_t value);
+
+            uint32_t (NV1::*read_func)();
+            void (NV1::*write_func)(uint32_t value);
 
             const char* description;
         };
@@ -232,9 +327,29 @@ namespace NV1Sim
             // PFB
             { NV_PFB_BOOT_0, { &this->pfb.boot, nullptr, nullptr, "Framebuffer Manufacture-Time Configuration"}},
             { NV_PFB_CONFIG_0, { &this->pfb.config, nullptr, nullptr, nullptr } }, 
+        
+            // PFIFO
+            { NV_PFIFO_INTR_0, { &this->pfifo.intr, nullptr, nullptr, "PFIFO Interrupt Status" } } ,
+            { NV_PFIFO_INTR_EN_0, { &this->pfifo.intr_en, nullptr, nullptr, "PFIFO Interrupt Enable" } } ,
+            { NV_PFIFO_CONFIG_0, { &this->pfifo.config, nullptr, nullptr, "PFIFO General Config" } },
+            { NV_PFIFO_CACHES, { &this->pfifo.cache_reassignment, nullptr, nullptr, "PFIFO Cache Reassignment (Context Switching) Enable"} },
+            { NV_PFIFO_CACHE0_PUSH0, { &this->pfifo.cache0.push_access_enable, nullptr, nullptr, "PFIFO CACHE0 Push0 (Push Access Enabled)"} },
+            { NV_PFIFO_CACHE1_PUSH0, { &this->pfifo.cache1.push_access_enable, nullptr, nullptr, "PFIFO CACHE1 Push0 (Push Access Enabled)"} },
+            { NV_PFIFO_CACHE0_PUSH1, { &this->pfifo.cache0.push_channel_id, nullptr, nullptr, "PFIFO CACHE0 Push1 (Channel ID)"} },
+            { NV_PFIFO_CACHE1_PUSH1, { &this->pfifo.cache1.push_channel_id, nullptr, nullptr, "PFIFO CACHE1 Push0 (Channel ID)"} },
+            { NV_PFIFO_CACHE0_PULL0, { &this->pfifo.cache0.pull0, nullptr, nullptr, "PFIFO CACHE0 Pull Settings 0 (bit8 - Hardware or Software (object?) - bit4 set if hash failed; bit 0 - access enabled)"}} ,
+            { NV_PFIFO_CACHE1_PULL0, { &this->pfifo.cache1.pull0, nullptr, nullptr, "PFIFO CACHE1 Pull Settings 0 (bit8 - Hardware or Software (method?) - bit4 set if hash failed; bit 0 - access enabled)"}} ,
+            { NV_PFIFO_CACHE0_PULL1, { &this->pfifo.cache0.pull1, nullptr, nullptr, "PFIFO CACHE0 Pull Settings 1 (bit8 - Object Changed?; bit4 - 1 if context is dirty; bits 2-0: subchannel"} },
+            { NV_PFIFO_CACHE1_PULL1, { &this->pfifo.cache1.pull1, nullptr, nullptr, "PFIFO CACHE1 Pull Settings 1 (bit8 - Object Changed?; bit4 - 1 if context is dirty; bits 2-0: subchannel"} },
+            { NV_PFIFO_CACHE0_STATUS, { &this->pfifo.cache0.status, nullptr, nullptr, "PFIFO CACHE0 Status"} },
+            { NV_PFIFO_CACHE1_STATUS, { &this->pfifo.cache1.status, nullptr, nullptr, "PFIFO CACHE0 Status"} },
+            
+
+            // PRAM
+            { NV_PRAM_CONFIG_0, { &this->pram.config, nullptr, &NV1::SetRAMINConfig, nullptr } }, 
             
             // PEXTDEV/STRAPS
-            { NV_PEXTDEV_BOOT_0, { &this->straps, nullptr, nullptr, "Straps (OEM Configuration)"} }, 
+            { NV_PEXTDEV_BOOT_0, { &this->straps, nullptr, nullptr, "Straps (OEM Configuration)"}  }, 
         }; 
 
         void Start()
@@ -247,7 +362,7 @@ namespace NV1Sim
             if (addr <= NV_USER_START)
             {
                 if (mappings32[addr].read_func)
-                    return (this->*this->mappings32[addr].read_func)(addr);
+                    return (this->*this->mappings32[addr].read_func)();
                 else
                     return *mappings32[addr].reg; 
             }
@@ -259,7 +374,7 @@ namespace NV1Sim
             if (addr <= NV_USER_START)
             {
                 if (mappings32[addr].write_func)
-                    (this->*this->mappings32[addr].write_func)(addr, value);
+                    (this->*this->mappings32[addr].write_func)(value);
                 else 
                     *mappings32[addr].reg = value; 
             }
@@ -277,5 +392,7 @@ namespace NV1Sim
         uint32_t ReadRAMIN32(uint32_t addr) { return state.video_ram32[GetRAMINAddress(addr) >> 2]; };
         void WriteRAMIN32(uint32_t addr, uint32_t value) { state.video_ram32[GetRAMINAddress(addr) >> 2] = value; };
     
+        // Register stuff
+        void SetRAMINConfig(uint32_t value);
     }; 
 }

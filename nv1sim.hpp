@@ -13,3 +13,4 @@
 #define APP_BUILD_DATE __DATE__ " " __TIME__ 
 
 #define APP_SIGNON_STRING APP_NAME " " APP_VERSION " " APP_BUILD_DATE
+

@@ -4,6 +4,7 @@
 #include "core/core.hpp"
 #include <NV1Sim.hpp>
 #include <core/core.hpp>
+#include <core/ui/ui.hpp>
 #include <iostream>
 
 namespace NV1Sim
@@ -29,6 +30,7 @@ namespace NV1Sim
             SDL_RenderClear(game.renderer);
 
             Game_RenderLevel();
+            Game_RenderUI();
 
             Game_EndRenderUI();
             SDL_RenderPresent(game.renderer);

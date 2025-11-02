@@ -28,6 +28,9 @@ add_executable (NV1Sim
 # Core - Logging
 "core/logging/logging.cpp"
 
+# Core - UI
+"core/ui/ui_base.cpp"
+
 # NV1
 "nv/core/nv1_core.cpp"
 "nv/core/nv1_pfifo.cpp"

@@ -8,6 +8,7 @@
 #include "SDL3/SDL_init.h"
 #include "SDL3/SDL_render.h"
 #include "SDL3/SDL_video.h"
+#include "core/ui/ui.hpp"
 #include "imgui_impl_sdl3.h"
 
 namespace NV1Sim
@@ -88,13 +89,9 @@ namespace NV1Sim
         {
             // first send the event down into UI
             ImGui_ImplSDL3_ProcessEvent(&next_event);
-
-            bool w_down = false, a_down = false, s_down = false, d_down = false;
-            bool left_down = false, right_down = false, up_down = false, down_down = false;  
-
+            
             switch (next_event.type)
             {
-            
                 case SDL_EVENT_KEY_UP:
                     key_state[next_event.key.scancode] = false; 
                     break; 
@@ -104,14 +101,13 @@ namespace NV1Sim
                 case SDL_EVENT_QUIT:
                     game.running = false; 
                     break;
-
             }
         }
     }
 
     void Game_Tick()
     {
-    
+
     }
 
     bool Game_Shutdown()

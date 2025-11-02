@@ -4,6 +4,8 @@
 #include "SDL3/SDL_scancode.h"
 #include <nv1sim.hpp>
 
+#include <nv/nv1.hpp>
+
 namespace NV1Sim
 {
     #define NS_PER_SECOND 1000000000
@@ -38,12 +40,11 @@ namespace NV1Sim
     };
 
     extern Game game; 
+    extern NV1* gpu;
 
     // Core functionality
     bool Game_Init();
-    void Game_InitUI();
-    void Game_StartRenderUI();
-    void Game_EndRenderUI();
+
 
     void Game_PumpEvents();
     void Game_Tick();               // Run each tick

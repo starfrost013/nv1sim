@@ -93,4 +93,27 @@ namespace NV1Sim
         }
     }
 
+    // Set NV1 RAMIN Config
+    void NV1::SetRAMINConfig(uint32_t value)
+    {
+        pram.config = value & 0x03;
+
+        // set the sizes
+        pram.ramht_size = 0x1000 << (pram.config);
+        pram.ramro_size = 0x800 << (pram.config);
+
+        // these have the same size for all configurations
+        pram.ramfc_size = pram.ramro_size;
+
+        pram.ramau_size = NV_RAMAU__SIZE_0;
+        pram.rampw_size = NV_RAMPW__SIZE_0;
+
+        pram.ramht_start = 0;
+        pram.ramro_start = pram.ramht_start + pram.ramht_size;
+        pram.ramfc_start = pram.ramro_start + pram.ramro_size;
+        pram.ramau_start = pram.ramfc_start + pram.ramfc_size;
+        pram.rampw_start = pram.ramau_start + pram.rampw_size;
+
+    }
+
 }

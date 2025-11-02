@@ -1928,6 +1928,9 @@
 #define NV_PGRAPH_CHROMA_ALPHA                                30:30 /* RWXUF */
 #define NV_PGRAPH_BETA                                   0x00400630 /* RW-4R */
 #define NV_PGRAPH_BETA_VALUE_FRACTION                         30:23 /* RWXUF */
+
+#define NV_PGRAPH_XY_LOGIC_RAM_SIZE                              18 // NV1Sim (Halloween!)
+
 #define NV_PGRAPH_ABS_X_RAM(i)                   (0x00400400+(i)*4) /* RW-4A */
 #define NV_PGRAPH_ABS_X_RAM__SIZE_1                              18 /*       */
 #define NV_PGRAPH_ABS_X_RAM_VALUE                              31:0 /* RWXUF */
@@ -3044,7 +3047,7 @@
 
 #define NV_PRAM                               0x00602FFF:0x00602000 /* RW--D */
 #define NV_PRAM_CONFIG_0                                 0x00602200 /* RW-4R */
-#define NV_PRAM_CONFIG_0_SIZE                                   1:0 /* RWIVF */
+#define NV_PRAM_CONFIG_0_SIZE                                     0 /* RWIVF */
 #define NV_PRAM_CONFIG_0_SIZE_12KB                       0x00000000 /* RWI-V */
 #define NV_PRAM_CONFIG_0_SIZE_20KB                       0x00000001 /* RW--V */
 #define NV_PRAM_CONFIG_0_SIZE_36KB                       0x00000002 /* RW--V */
@@ -3543,6 +3546,7 @@
 #define NV_RAMRO_DATA                         ( 1*32+31):( 1*32+ 0) /* RWXVF */
 
 #define NV_RAMAU                              0x00000BFF:0x00000000 /* RW--M */
+#define NV_RAMAU__SIZE_0                                 0x00000C00 /* NV1Sim */
 #define NV_RAMAU_DATA                                          31:0 /* RWXVF */
 
 #define NV_RAMFC__SIZE_0                      0x000007FF:0x00000000 /* RW--M */
@@ -3573,6 +3577,7 @@
 #define NV_RAMFC_LIE_7_ENABLED                           0x00000001 /* RW--V */
 
 #define NV_RAMPW                              0x000003FF:0x00000000 /* RW--M */
+#define NV_RAMPW__SIZE_0                                 0x00000400
 #define NV_RAMPW_PASSWORD_0                   ( 0*32+31):( 0*32+ 0) /* RWXVF */
 #define NV_RAMPW_PASSWORD_1                   ( 1*32+31):( 1*32+ 0) /* RWXVF */
 

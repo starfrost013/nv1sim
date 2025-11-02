@@ -4,11 +4,11 @@
 //
 
 #include <core/core.hpp>
+#include <core/ui/ui.hpp>
 
 #include "SDL3/SDL_gpu.h"
-#include "imgui.h"
-#include "imgui_impl_sdl3.h"
-#include "imgui_impl_sdlgpu3.h"
+#include "ui/ui.hpp"
+
 
 namespace NV1Sim
 {
@@ -36,6 +36,9 @@ namespace NV1Sim
         };
 
         ImGui_ImplSDLGPU3_Init(&info);
+
+        // create all UIs
+
     }
 
     void Game_StartRenderUI()
@@ -44,7 +47,23 @@ namespace NV1Sim
         ImGui_ImplSDLGPU3_NewFrame();
         ImGui_ImplSDL3_NewFrame();
         ImGui::NewFrame();
-        ImGui::ShowDemoWindow();
+    }
+
+    void Game_RenderUI()
+    {
+         uint32_t ui_index = 0; 
+
+        // array is probably a bit faster than STL
+        AppUI appui = AppUIs[ui_index];
+
+        while (appui.name != nullptr)
+        {
+            if (appui.enabled)
+                appui.SetupFunction();
+
+            ui_index++; 
+            appui = AppUIs[ui_index];
+        }
     }
 
     // This actually performs the UI renders
@@ -64,7 +83,7 @@ namespace NV1Sim
             .texture = swapchain,
             .mip_level = 0,
             .layer_or_depth_plane = 0,
-            .clear_color = {0.0f, 0.0f, 0.0f, 0.0f},
+            .clear_color = {0.0f, 0.0f, 0.0f, 1.0f},
             .load_op = SDL_GPU_LOADOP_LOAD,
             .store_op = SDL_GPU_STOREOP_STORE,
             .cycle = false,
