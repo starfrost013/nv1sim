@@ -16,6 +16,7 @@
 #include <functional>
 #include <nv1sim.hpp>
 #include "nv1_regs.hpp"
+#include <util/util.hpp>
 
 namespace NV1Sim
 {
@@ -77,7 +78,7 @@ namespace NV1Sim
 
         // Cache for object storage
         // TODO: Consider separating pull0/1
-        struct PFIFOCache
+        struct PFIFOCacheBase
         {
             uint32_t push_access_enable;
             uint32_t push_channel_id;
@@ -87,6 +88,28 @@ namespace NV1Sim
             uint32_t get_address;
             uint32_t put_address;
             uint32_t context[NV_PFIFO_CACHE1_CTX__SIZE_1];
+
+
+        };
+
+        struct PFIFOCache0
+        {
+            PFIFOCacheBase cache_data;
+        };
+
+        struct PFIFOCache1
+        {
+            PFIFOCacheBase cache_data;
+
+            // Get free spaces (cache1 only)
+            uint32_t GetFreeSpaces()
+            {
+                // convert to slot number
+                uint8_t binary_get_address = Util_Gray2Binary(cache_data.get_address) << 2;
+                uint8_t binary_put_address = Util_Gray2Binary(cache_data.put_address) << 2;
+
+                return (binary_get_address - binary_put_address - 4) & 0x7C; //GUARANTEED fifo depth
+            }
         };
 
         // PFIFO cache entry
@@ -103,9 +126,9 @@ namespace NV1Sim
             uint32_t intr_en;                       // Master Interrupt Enable
             uint32_t config;
             uint32_t cache_reassignment;            // Allow context switching?
-            PFIFOCache cache0;
+            PFIFOCache0 cache0;
             PFIFOCacheEntry cache0_data;            // PFIFO (CACHE0 - software method injection) context
-            PFIFOCache cache1;
+            PFIFOCache1 cache1;
             PFIFOCacheEntry cache1_data[NV_PFIFO_CACHE1_METHOD__SIZE_1];            // PFIFO (CACHE1 - general submission) Gray code context
         
             uint32_t runout_status;
@@ -366,7 +389,19 @@ namespace NV1Sim
                 else
                     return *mappings32[addr].reg; 
             }
+            else
+            {
+                
+                uint32_t channel_number = (addr & 0x7FFFFF);
+                uint32_t subchannel_number = (addr >> 13) % 8; // number of subchannels
 
+                // channel offset
+                switch (addr & 0x1FFC)
+                {
+                    case NV_CHANNEL_OFFSET_FREE_COUNT_START ... NV_CHANNEL_OFFSET_FREE_COUNT_END:
+                        return pfifo.cache1.GetFreeSpaces();
+                }
+            }
         };
 
         void WriteRegister32(uint32_t addr, uint32_t value)
@@ -378,7 +413,17 @@ namespace NV1Sim
                 else 
                     *mappings32[addr].reg = value; 
             }
+            else
+            {
+                uint32_t channel_number = (addr & 0x7FFFFF);
+                uint32_t subchannel_number = (addr >> 13) % 8; // number of subchannels
 
+                // channel offset
+                switch (addr & 0x1FFC)
+                {
+                    
+                }
+            }
         };
 
         uint8_t ReadVRAM8(uint32_t addr) { return state.video_ram8[addr]; }; 
@@ -394,5 +439,10 @@ namespace NV1Sim
     
         // Register stuff
         void SetRAMINConfig(uint32_t value);
+
+        void PFIFOCache0Push();
+        void PFIFOCache0Pull();
+        void PFIFOCache1Push();
+        void PFIFOCache1Pull();
     }; 
 }

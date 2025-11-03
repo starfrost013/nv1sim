@@ -3779,3 +3779,6 @@
 #define NV_AUDNOTE_SU_CHANNEL_MONO                       0x00000000 /* RW--V */
 #define NV_AUDNOTE_SU_CHANNEL_STEREO                     0x00000001 /* RW--V */
 #define NV_AUDNOTE_SU_PDFB                    (10*32+31):(10*32+31) /* RWXVF */
+
+#define NV_CHANNEL_OFFSET_FREE_COUNT_START               0x00000010 
+#define NV_CHANNEL_OFFSET_FREE_COUNT_END                 0x00000013

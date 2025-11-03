@@ -32,9 +32,8 @@ namespace NV1Sim
             return baseMappings[addr]; 
         };
     private: 
+    
         NV1* gpu;
-
-
         // Methods below 0x0100 are here
         std::unordered_map<uint32_t, NV1MethodMapping> baseMappings;
 
