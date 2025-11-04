@@ -1,0 +1,148 @@
+# WATCOM wmake makefile for building SDK sample
+# Uses WATCOM C/C++ 32-bit compiler and linker,
+# and Soft-ICE/W for debugging.
+
+NAME            =       quadtex
+
+#
+# Production or DEBUG mode? 
+# debug is the default, a MODE environment variable overrides.
+#
+!ifndef %MODE
+MODE=debug
+!else
+MODE=$(%MODE)
+!endif
+
+#
+# Directories.
+#
+
+SDKDIR          =       \NV\SDK
+OBJDIR          =       .\OBJ
+INCDIR          =       $(SDKDIR)\INC
+LIBDIR          =       $(SDKDIR)\LIB
+
+!ifndef %WATCOM
+WATCOM=C:\WATCOM
+!else
+WATCOM=$(%WATCOM)
+!endif
+
+!ifndef %SOFTICE
+SOFTICE=C:\WINICE
+!else
+SOFTICE=$(%SOFTICE)
+!endif
+
+TOOLINCDIR      =       $(WATCOM)\h;$(WATCOM)\h\nt
+
+#
+# Tool defines.
+#
+# Assume the WATCOM 10.X tools are in the path.
+# (If not, they are probably in subdirectories of $(WATCOM): BIN, BINB, etc.)
+#
+
+CC     = wcc386
+RC     = wrc
+LINK   = wlink
+
+#
+# Compiler flags.
+#
+# To avoid too-long command-lines, these are set in a command-line variable.
+#
+DEFS   =
+!ifeq MODE debug 
+CFLAGS =  -i=$(INCDIR);$(TOOLINCDIR) -w4 -5r -fp5 -zq -od -d2 -hc -bt=nt $(DEFS)
+!else
+CFLAGS =  -i=$(INCDIR);$(TOOLINCDIR) -wx -5r -fp5 -zq -omantex -bt=nt $(DEFS)
+!endif
+RCFLAGS = -i=$(INCDIR);$(TOOLINCDIR) -r -bt=nt $(DEFS)
+
+
+OBJS = $(OBJDIR)\wmain.obj    &
+       $(OBJDIR)\enable.obj   &
+       $(OBJDIR)\disable.obj  &
+       $(OBJDIR)\draw.obj     &
+       $(OBJDIR)\image.obj    &
+       $(OBJDIR)\geom.obj     &
+       $(OBJDIR)\fileio.obj 
+
+.BEFORE
+    @if not exist $(OBJDIR) @md $(OBJDIR)
+    
+#
+# Link dependencies.
+#
+LNK=$(NAME).lnk
+
+$(NAME).exe : $(NAME).def $(NAME).res $(OBJS) $(LNK)
+    $(LINK) @$(LNK)
+    $(RC) $(NAME).res
+!ifeq MODE debug
+# Prepare to debug Win32s app with Soft-ICE/W
+    cvpack $(NAME).exe
+    $(SOFTICE)\dbg2map $(NAME).exe
+    $(SOFTICE)\msym $(NAME)
+!endif
+
+$(NAME).res : $(NAME).rc $(NAME).ico
+    $(RC) $(RCFLAGS) -fo=$*.res  $[@ 
+
+$(LNK) : $(NAME).def $(OBJS)
+    %create $(LNK)
+!ifeq MODE debug
+    @%append $(LNK) debug codeview
+!endif
+    @%append $(LNK) name $(NAME)
+    @%append $(LNK) option quiet
+    @%append $(LNK) OPTION STACK=16K
+    @%append $(LNK) SYSTEM nt_win
+    @%append $(LNK) LIBR $(SDKDIR)\lib\nvw32wc.lib
+    @%append $(LNK) LIBR $(WATCOM)\lib386\nt\nt.lib
+    @for %i in ($(OBJS)) do @%append $(LNK) file %i
+
+
+#
+# Compile dependencies.
+#
+
+$(OBJDIR)\wmain.obj : wmain.c sample.h patch.h
+        @SET WCC386=$(CFLAGS)
+        $(CC)  $^&.c /fo=$(OBJDIR)\*.obj
+
+$(OBJDIR)\enable.obj : enable.c sample.h patch.h
+        @SET WCC386=$(CFLAGS)
+        $(CC)  $^&.c /fo=$(OBJDIR)\*.obj
+
+$(OBJDIR)\disable.obj : disable.c sample.h patch.h
+        @SET WCC386=$(CFLAGS)
+        $(CC)  $^&.c /fo=$(OBJDIR)\*.obj
+
+$(OBJDIR)\draw.obj : draw.c sample.h patch.h
+        @SET WCC386=$(CFLAGS)
+        $(CC)  $^&.c /fo=$(OBJDIR)\*.obj
+
+$(OBJDIR)\image.obj : image.c sample.h patch.h
+        @SET WCC386=$(CFLAGS)
+        $(CC)  $^&.c /fo=$(OBJDIR)\*.obj
+
+$(OBJDIR)\geom.obj : geom.c sample.h patch.h
+        @SET WCC386=$(CFLAGS)
+        $(CC)  $^&.c /fo=$(OBJDIR)\*.obj
+
+$(OBJDIR)\fileio.obj : fileio.c sample.h patch.h
+        @SET WCC386=$(CFLAGS)
+        $(CC)  $^&.c /fo=$(OBJDIR)\*.obj
+
+
+clean: .symbolic
+    @erase $(OBJDIR)\*.obj
+    @erase *.err
+    @erase *.exe
+    @erase *.res
+    @erase *.lnk
+    @erase *.map
+    @erase *.sym

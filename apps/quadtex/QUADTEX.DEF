@@ -1,0 +1,9 @@
+NAME        NVidia SDK Sample QUADTEX. Copyright (C) NVidia Corp. 1995
+EXETYPE     WINDOWS 3.0
+CODE        PRELOAD MOVABLE DISCARDABLE
+DATA        PRELOAD SINGLE
+HEAPSIZE    1024
+
+EXPORTS     
+			 MainWndProc   @1
+			 About         @2

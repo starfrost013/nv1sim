@@ -13,6 +13,7 @@
 //
 
 #pragma once
+#include <cassert>
 #include <functional>
 #include <nv1sim.hpp>
 #include "nv1_regs.hpp"
@@ -325,6 +326,8 @@ namespace NV1Sim
         GPUSettings settings;
         GPUState state;
 
+        #define NV1_SINGLE_REGISTER             0xFFFFFFFF // means that this is a single register
+
         struct NV1Mapping
         {
             uint32_t* reg;
@@ -334,6 +337,11 @@ namespace NV1Sim
             void (NV1::*write_func)(uint32_t value);
 
             const char* description;
+            uint32_t end;           // optional for multigpu
+
+            // THESE MUST BE THE LAST ELEMENT DUE TO PROGRAMMING TERRORISM THAT WE DID!
+            uint32_t real_ptr = 0xFFFFFFFF;
+            uint32_t index = 0; 
         };
 
         // nearly every register is 32bit so we can get away with this 
@@ -341,32 +349,32 @@ namespace NV1Sim
         std::unordered_map<uint32_t, NV1Mapping> mappings32 =
         {
             // PMC
-            { NV_PMC_BOOT_0, { &this->pmc.boot, nullptr, nullptr } }, 
-            { NV_PMC_INTR_0, { &this->pmc.intr, nullptr, nullptr, nullptr } },
-            { NV_PMC_INTR_EN_0, { &this->pmc.intr_en, nullptr, nullptr, nullptr } }, 
-            { NV_PMC_INTR_READ_0, { &this->pmc.intr_read, nullptr, nullptr, nullptr } },
-            { NV_PMC_ENABLE, { &this->pmc.enable, nullptr, nullptr, nullptr } },
+            { NV_PMC_BOOT_0, { &this->pmc.boot, nullptr, nullptr, nullptr, NV1_SINGLE_REGISTER } }, 
+            { NV_PMC_INTR_0, { &this->pmc.intr, nullptr, nullptr, nullptr, NV1_SINGLE_REGISTER } },
+            { NV_PMC_INTR_EN_0, { &this->pmc.intr_en, nullptr, nullptr, nullptr, NV1_SINGLE_REGISTER } }, 
+            { NV_PMC_INTR_READ_0, { &this->pmc.intr_read, nullptr, nullptr, nullptr, NV1_SINGLE_REGISTER } },
+            { NV_PMC_ENABLE, { &this->pmc.enable, nullptr, nullptr, nullptr, NV1_SINGLE_REGISTER } },
 
             // PFB
-            { NV_PFB_BOOT_0, { &this->pfb.boot, nullptr, nullptr, "Framebuffer Manufacture-Time Configuration"}},
-            { NV_PFB_CONFIG_0, { &this->pfb.config, nullptr, nullptr, nullptr } }, 
+            { NV_PFB_BOOT_0, { &this->pfb.boot, nullptr, nullptr, "Framebuffer Manufacture-Time Configuration", NV1_SINGLE_REGISTER } },
+            { NV_PFB_CONFIG_0, { &this->pfb.config, nullptr, nullptr, nullptr, NV1_SINGLE_REGISTER } }, 
         
             // PFIFO
-            { NV_PFIFO_INTR_0, { &this->pfifo.intr, nullptr, nullptr, "PFIFO Interrupt Status" } } ,
-            { NV_PFIFO_INTR_EN_0, { &this->pfifo.intr_en, nullptr, nullptr, "PFIFO Interrupt Enable" } } ,
-            { NV_PFIFO_CONFIG_0, { &this->pfifo.config, nullptr, nullptr, "PFIFO General Config" } },
-            { NV_PFIFO_CACHES, { &this->pfifo.cache_reassignment, nullptr, nullptr, "PFIFO Cache Reassignment (Context Switching) Enable"} },
-            { NV_PFIFO_CACHE0_PUSH0, { &this->pfifo.cache0.push_access_enable, nullptr, nullptr, "PFIFO CACHE0 Push0 (Push Access Enabled)"} },
-            { NV_PFIFO_CACHE1_PUSH0, { &this->pfifo.cache1.push_access_enable, nullptr, nullptr, "PFIFO CACHE1 Push0 (Push Access Enabled)"} },
-            { NV_PFIFO_CACHE0_PUSH1, { &this->pfifo.cache0.push_channel_id, nullptr, nullptr, "PFIFO CACHE0 Push1 (Channel ID)"} },
-            { NV_PFIFO_CACHE1_PUSH1, { &this->pfifo.cache1.push_channel_id, nullptr, nullptr, "PFIFO CACHE1 Push0 (Channel ID)"} },
-            { NV_PFIFO_CACHE0_PULL0, { &this->pfifo.cache0.pull0, nullptr, nullptr, "PFIFO CACHE0 Pull Settings 0 (bit8 - Hardware or Software (object?) - bit4 set if hash failed; bit 0 - access enabled)"}} ,
-            { NV_PFIFO_CACHE1_PULL0, { &this->pfifo.cache1.pull0, nullptr, nullptr, "PFIFO CACHE1 Pull Settings 0 (bit8 - Hardware or Software (method?) - bit4 set if hash failed; bit 0 - access enabled)"}} ,
-            { NV_PFIFO_CACHE0_PULL1, { &this->pfifo.cache0.pull1, nullptr, nullptr, "PFIFO CACHE0 Pull Settings 1 (bit8 - Object Changed?; bit4 - 1 if context is dirty; bits 2-0: subchannel"} },
-            { NV_PFIFO_CACHE1_PULL1, { &this->pfifo.cache1.pull1, nullptr, nullptr, "PFIFO CACHE1 Pull Settings 1 (bit8 - Object Changed?; bit4 - 1 if context is dirty; bits 2-0: subchannel"} },
-            { NV_PFIFO_CACHE0_STATUS, { &this->pfifo.cache0.status, nullptr, nullptr, "PFIFO CACHE0 Status"} },
-            { NV_PFIFO_CACHE1_STATUS, { &this->pfifo.cache1.status, nullptr, nullptr, "PFIFO CACHE0 Status"} },
-            
+            { NV_PFIFO_INTR_0, { &this->pfifo.intr, nullptr, nullptr, "PFIFO Interrupt Status", NV1_SINGLE_REGISTER } } ,
+            { NV_PFIFO_INTR_EN_0, { &this->pfifo.intr_en, nullptr, nullptr, "PFIFO Interrupt Enable", NV1_SINGLE_REGISTER } } ,
+            { NV_PFIFO_CONFIG_0, { &this->pfifo.config, nullptr, nullptr, "PFIFO General Config", NV1_SINGLE_REGISTER } },
+            { NV_PFIFO_CACHES, { &this->pfifo.cache_reassignment, nullptr, nullptr, "PFIFO Cache Reassignment (Context Switching) Enable", NV1_SINGLE_REGISTER } },
+            { NV_PFIFO_CACHE0_PUSH0, { &this->pfifo.cache0.cache_data.push_access_enable, nullptr, nullptr, "PFIFO CACHE0 Push0 (Push Access Enabled)", NV1_SINGLE_REGISTER } },
+            { NV_PFIFO_CACHE1_PUSH0, { &this->pfifo.cache1.cache_data.push_access_enable, nullptr, nullptr, "PFIFO CACHE1 Push0 (Push Access Enabled)", NV1_SINGLE_REGISTER } },
+            { NV_PFIFO_CACHE0_PUSH1, { &this->pfifo.cache0.cache_data.push_channel_id, nullptr, nullptr, "PFIFO CACHE0 Push1 (Channel ID)", NV1_SINGLE_REGISTER } },
+            { NV_PFIFO_CACHE1_PUSH1, { &this->pfifo.cache1.cache_data.push_channel_id, nullptr, nullptr, "PFIFO CACHE1 Push0 (Channel ID)", NV1_SINGLE_REGISTER } },
+            { NV_PFIFO_CACHE0_PULL0, { &this->pfifo.cache0.cache_data.pull0, nullptr, nullptr, "PFIFO CACHE0 Pull Settings 0 (bit8 - Hardware or Software (object?) - bit4 set if hash failed; bit 0 - access enabled)", NV1_SINGLE_REGISTER }} ,
+            { NV_PFIFO_CACHE1_PULL0, { &this->pfifo.cache1.cache_data.pull0, nullptr, nullptr, "PFIFO CACHE1 Pull Settings 0 (bit8 - Hardware or Software (method?) - bit4 set if hash failed; bit 0 - access enabled)", NV1_SINGLE_REGISTER }} ,
+            { NV_PFIFO_CACHE0_PULL1, { &this->pfifo.cache0.cache_data.pull1, nullptr, nullptr, "PFIFO CACHE0 Pull Settings 1 (bit8 - Object Changed?; bit4 - 1 if context is dirty; bits 2-0: subchannel", NV1_SINGLE_REGISTER } },
+            { NV_PFIFO_CACHE1_PULL1, { &this->pfifo.cache1.cache_data.pull1, nullptr, nullptr, "PFIFO CACHE1 Pull Settings 1 (bit8 - Object Changed?; bit4 - 1 if context is dirty; bits 2-0: subchannel", NV1_SINGLE_REGISTER } },
+            { NV_PFIFO_CACHE0_STATUS, { &this->pfifo.cache0.cache_data.status, nullptr, nullptr, "PFIFO CACHE0 Status", NV1_SINGLE_REGISTER } },
+            { NV_PFIFO_CACHE1_STATUS, { &this->pfifo.cache1.cache_data.status, nullptr, nullptr, "PFIFO CACHE1 Status", NV1_SINGLE_REGISTER } },
+            { NV_PFIFO_CACHE0_CTX(0), { &this->pfifo.cache0.cache_data.context[0], nullptr, nullptr, "PFIFO Cache0 Subchannel Context Registers", NV_PFIFO_CACHE0_CTX(NV_PFIFO_CACHE0_CTX__SIZE_1) } },
 
             // PRAM
             { NV_PRAM_CONFIG_0, { &this->pram.config, nullptr, &NV1::SetRAMINConfig, nullptr } }, 
@@ -384,6 +392,50 @@ namespace NV1Sim
         { 
             if (addr <= NV_USER_START)
             {
+                // check the address exists
+                // by default, operator[] creates an element, so we create every index implicitly (once)
+                // this is probably faster than a manual search
+                
+                NV1Mapping mapping = mappings32[addr];
+                bool isRedirect = (mapping.reg == nullptr);
+                uint32_t index = 0;
+
+                if (mapping.reg == nullptr
+                && isRedirect)
+                {
+                    uint32_t start_addr = addr;
+
+                    // mapping doesn't exist, find one that does
+                    while (mapping.reg == nullptr
+                    && addr >= 0)
+                    {
+                        addr -= 4;
+                        mapping = mappings32[addr];
+                    }
+
+                    // now we are pointing to a real mapping
+                    uint32_t real_ptr_new = addr;
+                    uint32_t cur_index = (start_addr - addr) >> 2;                 // index *our* addr reprensets
+
+                    for (uint32_t temp_addr = start_addr + 4; temp_addr > addr; temp_addr -= 4)
+                    {
+                        // index 0 not needed
+                        mappings32[temp_addr].real_ptr = addr; 
+                        mappings32[temp_addr].index = cur_index;
+                        cur_index--;
+                    }
+
+                    //use access function
+                }
+
+                // get the real pointer
+                if (mapping.real_ptr != 0xFFFFFFFF)
+                {
+                    //store index
+                    index = mapping.index;
+                    mapping = mappings32[mapping.real_ptr];
+                }
+
                 if (mappings32[addr].read_func)
                     return (this->*this->mappings32[addr].read_func)();
                 else
